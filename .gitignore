@@ -1,3 +1,9 @@
+# output
+*.out
+results/
+create_data/expert-data
+rce/exp_data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

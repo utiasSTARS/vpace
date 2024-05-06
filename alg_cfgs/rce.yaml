@@ -1,0 +1,10 @@
+shared_layers: false
+no_bootstrap_on_done: false
+no_entropy_in_qloss: true
+q_type: "classifier"
+sqil_rce_bootstrap_expert_mode: "no_boot"
+sac_alpha_mode: "fixed"
+sac_initial_alpha: 1.0e-4
+n_step: 10
+target_polyak_averaging: 5.0e-3
+q_over_max_penalty: 0.0

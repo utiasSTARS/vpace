@@ -1,0 +1,3 @@
+shared_layers: false
+q_over_max_penalty: 10.0
+expbuf_model_sample_rate: 0.0

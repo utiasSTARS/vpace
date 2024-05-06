@@ -1,0 +1,2 @@
+shared_layers: false
+q_over_max_penalty: 10.0
