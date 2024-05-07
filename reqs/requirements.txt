@@ -1,0 +1,1 @@
+rl_sandbox @ git+ssh://git@github.com/utiasSTARS/lfgp-internal.git@master#egg=lfgp-internal&subdirectory=rl_sandbox
