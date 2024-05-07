@@ -41,15 +41,15 @@ By default, all results will be stored under `vpace/results`, but you can change
 
 ### Quick Start
 To train a VPACE-SQIL model for `Unstack-Stack`, you can use:
-```python
+```bash
 python run_vpace.py --main_task unstack_nm --reward_model sqil --exp_name test
 ```
 For `sawyer_box_close`:
-```python
+```bash
 python run_vpace.py --env_type sawyer --env_name sawyer_box_close --reward_model sqil --exp_name test
 ```
 For `relocate-human-v0-najp-dp`:
-```python
+```bash
 python run_vpace.py --env_type hand_dapg --env_name relocate-human-v0-najp-dp --reward_model sqil --exp_name test
 ```
 
@@ -59,9 +59,9 @@ To choose a task to run, you can use combinations of `--env_type`, `--env_name`,
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | `--env_type`               | `manipulator_learning` (default, Panda environment), `sawyer`, `hand_dapg`                                                          | Environment type                                |
 | `--env_name` (Panda)       | `PandaPlayInsertTrayXYZState` (default)                                                                                             | Environment name for all Panda tasks            |
-| `--env_name` (Sawyer)      | `sawyer_drawer_open`, `sawyer_drawer_close`, `sawyer_push`, <br> `sawyer_lift`, `sawyer_box_close`, `sawyer_bin_picking`            | Environment name for Sawyer tasks               |
-| `--env_name` (Adroit Hand) | `door-human-v0`, `hammer-human-v0`, `relocate-human-v0`, <br> `door-human-v0-dp`, `hammer-human-v0-dp`, `relocate-human-v0-najp-dp` | Environment name for Adroit Hand tasks          |
-| `--main_task`              | `reach`,`lift`,`move`,`stack_nm`,<br>`unstack_nm`,`bring_nm`,`insert_nb_nm`                                                            | Panda env task (applies <br> to Panda env only) |
+| `--env_name` (Sawyer)      | `sawyer_drawer_open`, `sawyer_drawer_close`, `sawyer_push`, `sawyer_lift`, `sawyer_box_close`, `sawyer_bin_picking`            | Environment name for Sawyer tasks               |
+| `--env_name` (Adroit Hand) | `door-human-v0`, `hammer-human-v0`, `relocate-human-v0`, `door-human-v0-dp`, `hammer-human-v0-dp`, `relocate-human-v0-najp-dp` | Environment name for Adroit Hand tasks          |
+| `--main_task`              | `reach`, `lift`, `move`, `stack_nm`, `unstack_nm`, `bring_nm`,`insert_nb_nm`                                                            | Panda env task (applies to Panda env only) |
 
 
 ### Algorithm Options
@@ -70,22 +70,22 @@ Common options you can change to reproduce our main results are:
 | ---------------------- | --------------------------------------- | ------------------------------------------------------------ |
 | `--reward_model`       | `discrimininator`,`sqil`,`rce`,`sparse` | Reward model                                                 |
 | `--single_task`        | (Add to turn on, otherwise off)         | Run without ACE/LfGP framework                               |
-| `--q_over_max_penalty` | Float (default `10.0`)                  | Strength of value penalization <br> (\lambda from the paper). <br> Set to `0.0` to turn VP off. |
+| `--q_over_max_penalty` | Float (default `10.0`)                  | Strength of value penalization (\lambda from the paper). Set to `0.0` to turn VP off. |
 
 ### Ablation Study Options
 
 To reproduce our ablation study results, you can use the following option combinations:
 | Ablation                     | Options to Add                                             | Description                                                    |
 | ---------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------- |
-| +Full Trajectories           | `--add_default_full_traj`                                  | Add full trajectory expert data, <br> in addition to exmaples. |
-| +Full Trajectories & Actions | `--add_default_full_traj` <br>`--expert_data_mode obs_act` | Same as above, but include <br> actions as well.               |
-| SAC-X (Sparse Rewards)       | `--reward_model sparse`                                    | Use true sparse rewards, <br> instead of examples.             |
+| +Full Trajectories           | `--add_default_full_traj`                                  | Add full trajectory expert data, in addition to exmaples. |
+| +Full Trajectories & Actions | `--add_default_full_traj --expert_data_mode obs_act` | Same as above, but include actions as well.               |
+| SAC-X (Sparse Rewards)       | `--reward_model sparse`                                    | Use true sparse rewards, instead of examples.             |
 | \lambda = 1                  | `--q_over_max_penalty 1.0`                                 | Value penalization strength of 1.                              |
 | \lambda = 100                | `--q_over_max_penalty 100.0`                               | Value penalization strength of 100.                            |
 | 10 Examples                  | `expert_amounts 10`                                        | Use only 10 examples per task.                                 |
 | 100 Examples                 | `expert_amounts 100`                                       | Use only 100 examples per task.                                |
 | No Example Augmentation      | `--expert_randomize_factor 0.0`                            | Turn off example augmentation.                                 |
-| 10 Examples, No Ex. Aug.     | `--expert_amounts 10` <br> `--expert_randomize_factor 0.0` | 10 examples, no ex. aug.                                       |
+| 10 Examples, No Ex. Aug.     | `--expert_amounts 10 --expert_randomize_factor 0.0` | 10 examples, no ex. aug.                                       |
 
 ## Figures
 To generate plots and figures, you can use the scripts in `figures` and `plotting`.
