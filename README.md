@@ -12,12 +12,12 @@ This repository contains data, code, and instructions for reproducing the result
 - [Figures](#figures)
 
 ## Installation (Algorithm + Panda Environments)
-Our method and code is built on [learning from guided play (LfGP)](https://github.com/utiasSTARS/lfgp).
+Our method and code is built on [learning from guided play (LfGP)](https://github.com/vpace-anon/lfgp).
 We recommend first setting up a virtual environment (`conda`, `virtualenv`, etc.).
 We have tested python 3.7-3.11, but recommend python 3.11.
 To install:
 
-1. `git clone git@github.com:utiasSTARS/vpace.git && cd vpace`
+1. `git clone git@github.com:vpace-anon/vpace.git && cd vpace`
 2. `pip install -r reqs/requirements.txt`
 3. `export VPACE_TOP_DIR=$PWD`  (optionally set this elsewhere, but you must also move `expert_data`).
 
