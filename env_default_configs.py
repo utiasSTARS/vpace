@@ -5,7 +5,22 @@ def get_common_env_defaults(args):
     move_file = args.move_obj_filename
     ust = '_unstack-stack'
 
-    if args.env_type == c.MANIPULATOR_LEARNING:
+    if args.env_type == c.PANDA_RL_ENVS:
+        args.save_interval = 5000
+        args.eval_freq = 1000000  # no eval, do post eval on saved steps only?
+        args.train_during_env_step = True
+
+        if args.env_name == 'SimPandaReach':
+            args.max_steps = 50000
+        else:
+            raise NotImplementedError(f"Not yet implemented for panda_rl_envs env {args.env_name}")
+
+        if args.single_task:
+            args.expert_filenames = f'{args.env_name}.gz'
+        else:
+            raise NotImplementedError("panda_rl_envs not yet implemented for multitask")
+
+    elif args.env_type == c.MANIPULATOR_LEARNING:
         ##### scheduler period, control freq
         if args.control_hz == 5:
             args.env_control_hz = 5
