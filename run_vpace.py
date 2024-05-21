@@ -50,6 +50,7 @@ parser.add_argument('--hand_dapg_dp_kwargs', type=str,
                     help="For overriding the defaults: e.g., 'control_hz:5,common_control_multiplier:.05'.")
 parser.add_argument('--train_during_env_step', action='store_true',
                     help="(for non-sim envs) Perform train/backwards pass during env step delay between act exec and obs gen")
+parser.add_argument('--checkpoint_every_ep', action='store_true', help="Save checkpoint after every ep to restart from")
 
 # expert data
 parser.add_argument('--expert_data_mode', type=str, default="obs_only_no_next", help="options are [obs_act, obs_only, obs_only_no_next].")

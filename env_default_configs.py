@@ -9,6 +9,7 @@ def get_common_env_defaults(args):
         args.save_interval = 5000
         args.eval_freq = 1000000  # no eval, do post eval on saved steps only?
         args.train_during_env_step = True
+        args.checkpoint_every_ep = True
 
         if args.env_name == 'SimPandaReach':
             args.max_steps = 50000
