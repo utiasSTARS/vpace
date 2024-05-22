@@ -6,7 +6,7 @@ def get_common_env_defaults(args):
     ust = '_unstack-stack'
 
     if args.env_type == c.PANDA_RL_ENVS:
-        args.save_interval = 5000
+        args.save_interval = 1000
         args.eval_freq = 1000000  # no eval, do post eval on saved steps only?
         args.train_during_env_step = True
         args.checkpoint_every_ep = True
