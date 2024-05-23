@@ -6,10 +6,14 @@ def get_common_env_defaults(args):
     ust = '_unstack-stack'
 
     if args.env_type == c.PANDA_RL_ENVS:
-        args.save_interval = 1000
+        args.save_interval = 5000
         args.eval_freq = 1000000  # no eval, do post eval on saved steps only?
+        args.log_interval = 100
         args.train_during_env_step = True
         args.checkpoint_every_ep = True
+        args.buffer_warmup = 500
+        args.exploration_steps = 1000
+        args.frame_stack = 2
 
         if args.env_name == 'SimPandaReach':
             args.max_steps = 50000
