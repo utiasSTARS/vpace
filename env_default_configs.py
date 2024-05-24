@@ -14,16 +14,19 @@ def get_common_env_defaults(args):
         args.buffer_warmup = 500
         args.exploration_steps = 1000
         args.frame_stack = 2
+        args.num_gradient_updates = 2
+        args.main_intention = 0
+        args.scheduler = 'wrs'
 
         if args.env_name == 'SimPandaReach':
             args.max_steps = 50000
+            args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz'
+            args.scheduler_period = 25
         else:
             raise NotImplementedError(f"Not yet implemented for panda_rl_envs env {args.env_name}")
 
         if args.single_task:
             args.expert_filenames = f'{args.env_name}.gz'
-        else:
-            raise NotImplementedError("panda_rl_envs not yet implemented for multitask")
 
     elif args.env_type == c.MANIPULATOR_LEARNING:
         ##### scheduler period, control freq
