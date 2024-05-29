@@ -22,6 +22,11 @@ def get_common_env_defaults(args):
             args.max_steps = 50000
             args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz'
             args.scheduler_period = 25
+        elif 'SimPandaDoor' in args.env_name:
+            args.max_steps = 50000
+            args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz,{args.env_name}_grasp.gz'
+            args.scheduler_period = 10
+            args.scheduler = 'wrs_plus_handcraft'
         else:
             raise NotImplementedError(f"Not yet implemented for panda_rl_envs env {args.env_name}")
 
