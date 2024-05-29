@@ -18,7 +18,7 @@ def get_common_env_defaults(args):
         args.main_intention = 0
         args.scheduler = 'wrs'
 
-        if args.env_name == 'SimPandaReach':
+        if 'SimPandaReach' in args.env_name:
             args.max_steps = 50000
             args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz'
             args.scheduler_period = 25
