@@ -14,11 +14,11 @@ def get_common_env_defaults(args):
         args.buffer_warmup = 500
         args.exploration_steps = 1000
         args.frame_stack = 2
-        args.num_gradient_updates = 2
+        args.num_gradient_updates = 4
         args.main_intention = 0
         args.scheduler = 'wrs'
 
-        if 'SimPandaReach' in args.env_name:
+        if 'PandaReach' in args.env_name:
             args.max_steps = 50000
             args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz'
             args.scheduler_period = 25
