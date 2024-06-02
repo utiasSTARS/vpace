@@ -32,10 +32,13 @@ def get_common_env_defaults(args):
             args.scheduler_period = 10
             args.scheduler = 'wrs_plus_handcraft'
         elif 'PandaDrawer' in args.env_name:
-            args.buffer_warup = 200
-            args.exploration_steps = 400
+            # args.buffer_warmup = 200
+            # args.exploration_steps = 400
             args.max_steps = 100000
-            args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz,{args.env_name}_grasp.gz'
+            data_env_name = args.env_name
+            if args.env_name == 'PandaDrawerLongEp':
+                data_env_name = 'PandaDrawer'
+            args.expert_filenames = f'{data_env_name}.gz,{data_env_name}_reach.gz,{data_env_name}_grasp.gz'
             args.scheduler_period = 20
             args.scheduler = 'wrs_plus_handcraft'
         else:
