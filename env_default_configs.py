@@ -8,6 +8,7 @@ def get_common_env_defaults(args):
     if args.env_type == c.PANDA_RL_ENVS:
         args.save_interval = 5000
         args.eval_freq = 1000000  # no eval, do post eval on saved steps only?
+        args.print_interval = 1000000  # this causes a control delay, so effectively turning off
         args.log_interval = 100
         args.train_during_env_step = True
         args.checkpoint_every_ep = True
