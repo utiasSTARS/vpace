@@ -46,7 +46,7 @@ def get_common_env_defaults(args):
             raise NotImplementedError(f"Not yet implemented for panda_rl_envs env {args.env_name}")
 
         if args.single_task:
-            args.expert_filenames = f'{args.env_name}.gz'
+            args.expert_filenames = args.expert_filenames.split(',')[0]
 
     elif args.env_type == c.MANIPULATOR_LEARNING:
         ##### scheduler period, control freq
