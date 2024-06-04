@@ -37,8 +37,8 @@ def get_common_env_defaults(args):
             # args.exploration_steps = 400
             args.max_steps = 100000
             data_env_name = args.env_name
-            if args.env_name == 'PandaDrawerLongEp':
-                data_env_name = 'PandaDrawer'
+            if 'LongEp' in args.env_name:
+                data_env_name = args.env_name.split('LongEp')[0]
             args.expert_filenames = f'{data_env_name}.gz,{data_env_name}_reach.gz,{data_env_name}_grasp.gz'
             args.scheduler_period = 20
             args.scheduler = 'wrs_plus_handcraft'
