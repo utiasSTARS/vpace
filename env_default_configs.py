@@ -32,7 +32,7 @@ def get_common_env_defaults(args):
             args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz,{args.env_name}_grasp.gz'
             args.scheduler_period = 10
             args.scheduler = 'wrs_plus_handcraft'
-        elif 'PandaDrawer' in args.env_name:
+        elif 'PandaDrawer' in args.env_name or 'PandaDoor' in args.env_name:
             # args.buffer_warmup = 200
             # args.exploration_steps = 400
             args.max_steps = 100000
