@@ -9,6 +9,7 @@ import argparse
 import data_locations
 from rce_env_data_locations import main_performance as rce_data_locations
 from hand_dapg_data_locations import main_performance as hand_data_locations
+from real_panda_data_locations import main_performance as real_data_locations
 import common as plot_common
 
 
@@ -17,7 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--reload_data', action='store_true')
 parser.add_argument('--plot', type=str, default='main',
                     choices=['main', 'rce', 'hand', 'abl_expert', 'abl_alg', 'abl_dquant', 'rce_hand_theirs',
-                             'abl_all', 'abl_exaug', 'hardest', 'hardest_4'])
+                             'abl_all', 'abl_exaug', 'hardest', 'hardest_4', 'real', 'hardest_5'])
 parser.add_argument('--extra_name', type=str, default="")
 args = parser.parse_args()
 
@@ -45,10 +46,13 @@ if args.plot == 'rce':
     data_locs = rce_data_locations
 elif args.plot == 'hand':
     data_locs = hand_data_locations
+elif args.plot == 'real':
+    data_locs = real_data_locations
 elif args.plot == 'rce_hand_theirs':
     data_locs = {**rce_data_locations, **hand_data_locations}
 elif 'hardest' in args.plot:
-    data_locs = {**data_locations.main, **rce_data_locations, **hand_data_locations}
+    # data_locs = {**data_locations.main, **rce_data_locations, **hand_data_locations}
+    data_locs = {**data_locations.main, **rce_data_locations, **hand_data_locations, **real_data_locations}
 else:
     data_locs = getattr(data_locations, args.plot)
 #####################################################################################################################
@@ -128,13 +132,19 @@ for task_i, task in enumerate(task_dir_names):
                     mean = task_algo_data['mean']
                     std = task_algo_data['std']
 
-                if num_timesteps_mean > 1:
+                # hardcode for real robot envs
+                if task in real_data_locations:
+                    num_timesteps_mean_actual = 1
+                else:
+                    num_timesteps_mean_actual = num_timesteps_mean
+
+                if num_timesteps_mean_actual > 1:
                     # shape for multitask is raw is seed, eval step, aux task, eval ep
                     # for single is seed, eval step, eval ep
                     smooth_means = []
                     smooth_stds = []
                     for eval_step in range(task_algo_data['raw'].shape[1]):
-                        half_ts = num_timesteps_mean // 2
+                        half_ts = num_timesteps_mean_actual // 2
                         bottom_ind = max(0, eval_step - half_ts)
                         top_ind = min(task_algo_data['raw'].shape[1], eval_step + half_ts + 1)
                         if algo in multitask_algos:
@@ -183,6 +193,7 @@ for task_i, task in enumerate(task_dir_names):
                 # ax.fill_between(x_vals, mean - num_stds * std, mean + num_stds * std, facecolor=cmap(algo_i),
                 ax.fill_between(x_vals, mean - num_stds * std, mean + num_stds * std, facecolor=cmap(cmap_is[algo_i]),
                                 alpha=std_alpha)
+
             except Exception as e:
                 print(f"Error when processing task {task}, algo: {algo}:")
                 print(e)

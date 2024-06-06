@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--extra_name', type=str, default="")
 parser.add_argument('--reload_data', action='store_true')
 parser.add_argument('--plot', type=str, default='all',
-                    choices=['main', 'rce', 'hand', 'hand_orig', 'hand_dp', 'all', 'all_4_sep', 'rce_env_mods'])
+                    choices=['main', 'rce', 'hand', 'hand_orig', 'hand_dp', 'all', 'all_4_sep', 'all_5_sep', 'rce_env_mods'])
 parser.add_argument('--stddev_type', type=str, choices=['none', 'by_task', 'by_seed_mean'], default='by_task',
                     help="by_task is standard deviation of mean task performance, "\
                          "by_seed_mean is the mean of each tasks across-seed std dev.")
