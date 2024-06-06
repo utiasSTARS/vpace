@@ -40,7 +40,10 @@ def get_common_env_defaults(args):
             if 'LongEp' in args.env_name:
                 data_env_name = args.env_name.split('LongEp')[0]
             args.expert_filenames = f'{data_env_name}.gz,{data_env_name}_reach.gz,{data_env_name}_grasp.gz'
-            args.scheduler_period = 20
+            if 'Door' in args.env_name:
+                args.scheduler_period = 30
+            else:
+                args.scheduler_period = 20
             args.scheduler = 'wrs_plus_handcraft'
         else:
             raise NotImplementedError(f"Not yet implemented for panda_rl_envs env {args.env_name}")
