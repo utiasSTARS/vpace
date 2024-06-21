@@ -12,6 +12,7 @@ from scipy.ndimage import convolve1d
 import data_locations
 from rce_env_data_locations import main_performance as rce_data_locations
 from hand_dapg_data_locations import main_performance as hand_data_locations
+from real_panda_data_locations import main_performance as real_data_locations
 import common as plot_common
 
 
@@ -24,6 +25,7 @@ parser.add_argument('--plot', type=str, default='all',
 parser.add_argument('--stddev_type', type=str, choices=['none', 'by_task', 'by_seed_mean'], default='by_task',
                     help="by_task is standard deviation of mean task performance, "\
                          "by_seed_mean is the mean of each tasks across-seed std dev.")
+parser.add_argument('--force_vert_squish', action='store_true')
 args = parser.parse_args()
 
 fig_name = f"{args.plot}_envs_avg"
@@ -50,6 +52,7 @@ else:
         del valid_task_settingss[0]['relocate-human-v0']  # since all zeros for everything, and missing some results
 
 panda_task_settings = {**plot_common.PANDA_TASK_SETTINGS}
+real_task_settings = {**plot_common.REAL_PANDA_TASK_SETTINGS}
 
 root_dir, fig_path, experiment_root_dir, seeds, expert_root, expert_perf_files, expert_perf_file_main_task_i = \
     plot_common.get_path_defaults(fig_name=fig_name)
@@ -71,6 +74,10 @@ fig_shape, plot_size, num_stds, font_size, _, cmap, linewidth, std_alpha, x_val_
     plot_common.get_fig_defaults(num_plots=num_plots)
 num_stds = 0.25
 #####################################################################################################################
+
+if args.force_vert_squish:
+    plot_size[0] = 4.2
+    font_size += 4
 
 # pretty plotting, allow tex
 plt.rcParams.update({"text.usetex": True, "font.family": "serif"})
@@ -97,7 +104,7 @@ plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
 
 # directly load the data from sawyer and hand plots saved data, so we don't accidentally use diff data..and to save time
 all_returns = {}; all_successes = {}
-for data_fig_name in ['main_performance', 'rce_performance', 'hand_performance']:
+for data_fig_name in ['main_performance', 'rce_performance', 'hand_performance', 'real_performance']:
     data = pickle.load(open(os.path.join(root_dir, 'figures', data_fig_name, 'data', 'data.pkl'), 'rb'))
     for r_type in ['all_returns', 'all_successes']:
         for k, v in data[r_type].items():
@@ -136,17 +143,23 @@ for plot_i, r_ax in enumerate(r_axes_flat):
     # for task_i, task in enumerate(all_returns.keys()):
     for task_i, task in enumerate(valid_task_settings.keys()):
 
-        if task not in panda_task_settings:
+        if task not in panda_task_settings and task not in real_task_settings:
             try:
                 min_ret = valid_task_settings[task]['return_ylims'][0]
                 max_ret = valid_task_settings[task]['return_ylims'][1]
                 all_rets_norm[task] = {}
                 all_rets_norm_interp[task] = {}
-            except:
+            except Exception as e:
+                print(f"Exception: {e}")
                 import ipdb; ipdb.set_trace()
         all_sucs_norm_interp[task] = {}
 
-        for algo in valid_algos:
+        if task in real_task_settings:
+            loop_valid_algos = ['multi-sqil', 'sqil-no-vp']
+        else:
+            loop_valid_algos = valid_algos
+
+        for algo in loop_valid_algos:
             # remove non-main task data if multitask
             if algo in multitask_algos:
                 if task in panda_task_settings:
@@ -154,17 +167,23 @@ for plot_i, r_ax in enumerate(r_axes_flat):
                 else:
                     main_task_idx = 0
 
-                all_returns[task][algo]['raw'] = all_returns[task][algo]['raw'][:, :, main_task_idx, :]
+                # hardcode for real robot envs, no seed index
+                if task in real_task_settings:
+                    all_returns[task][algo]['raw'] = all_returns[task][algo]['raw'][:, main_task_idx, :]
+                    all_successes[task][algo]['raw'] = all_successes[task][algo]['raw'][:, main_task_idx, :]
+                else:
+                    all_returns[task][algo]['raw'] = all_returns[task][algo]['raw'][:, :, main_task_idx, :]
+                    all_successes[task][algo]['raw'] = all_successes[task][algo]['raw'][:, :, main_task_idx, :]
+
                 all_returns[task][algo]['mean'] = all_returns[task][algo]['mean'][:, main_task_idx]
                 all_returns[task][algo]['std'] = all_returns[task][algo]['std'][:, main_task_idx]
 
-                all_successes[task][algo]['raw'] = all_successes[task][algo]['raw'][:, :, main_task_idx, :]
                 all_successes[task][algo]['mean'] = all_successes[task][algo]['mean'][:, main_task_idx]
                 all_successes[task][algo]['std'] = all_successes[task][algo]['std'][:, main_task_idx]
 
 
             # first normalize the returns based on max_ret_norm
-            if task not in panda_task_settings:
+            if task not in panda_task_settings and task not in real_task_settings:
                 all_rets_norm[task][algo] = {}
                 all_rets_norm_interp[task][algo] = {}
                 all_rets_norm[task][algo]['raw'] = (all_returns[task][algo]['raw'] - min_ret) / (max_ret - min_ret)
@@ -175,10 +194,16 @@ for plot_i, r_ax in enumerate(r_axes_flat):
                 all_sucs_norm_interp[task][algo] = {}
 
             # then normalize the eval timesteps with interpolation and the max_eval_steps
-            num_eval_steps = all_returns[task][algo]['raw'].shape[1]
+            # hardcode for real robot envs, no seed index
+            if task in real_task_settings:
+                num_eval_steps = all_returns[task][algo]['raw'].shape[0]
+            else:
+                num_eval_steps = all_returns[task][algo]['raw'].shape[1]
             if num_eval_steps < max_eval_steps:
                 if task in panda_task_settings:
                     eval_interval = panda_task_settings[task]['eval_intervals']
+                elif task in real_task_settings:
+                    eval_interval = 5000
                 else:
                     eval_interval = 10000
 
@@ -189,16 +214,19 @@ for plot_i, r_ax in enumerate(r_axes_flat):
                 orig_x_new_max = (new_x.max() - new_x.min()) / (orig_x.max() - orig_x.min()) * \
                                 (orig_x - orig_x.min()) + new_x.min()
 
-                if task not in panda_task_settings:
+                if task not in panda_task_settings and task not in real_task_settings:
                     all_rets_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['mean'])
                     all_rets_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['std'])
 
                 else:
-                    all_sucs_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['mean'])
-                    all_sucs_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['std'])
+                    try:
+                        all_sucs_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['mean'])
+                        all_sucs_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['std'])
+                    except:
+                        import ipdb; ipdb.set_trace()
 
             else:
-                if task not in panda_task_settings:
+                if task not in panda_task_settings and task not in real_task_settings:
                     all_rets_norm_interp[task][algo]['mean'] = all_rets_norm[task][algo]['mean']
                     all_rets_norm_interp[task][algo]['std'] = all_rets_norm[task][algo]['std']
 
@@ -209,7 +237,7 @@ for plot_i, r_ax in enumerate(r_axes_flat):
             # put across-task data together
             if algo not in across_task_rets: across_task_rets[algo] = {'means': [], 'stds': []}
 
-            if task in panda_task_settings:
+            if task in panda_task_settings or task in real_task_settings:
                 across_task_rets[algo]['means'].append(all_sucs_norm_interp[task][algo]['mean'])
                 across_task_rets[algo]['stds'].append(all_sucs_norm_interp[task][algo]['std'])
             else:
@@ -280,6 +308,7 @@ for plot_i, r_ax in enumerate(r_axes_flat):
     r_ax.set_ylim([0, 1])
     r_ax.grid(alpha=0.5, which='both')
 
+    r_ax.tick_params(labelsize=font_size-8)
 
 if args.plot == 'all_4_sep':
     ax = r_fig.add_subplot(111, frameon=False)
@@ -297,12 +326,17 @@ bbox_to_anchor_dict = {
 
 if args.plot == 'all':
     ncol = 2
-    bbox_to_anchor = (0.45, -.4)
+    if args.force_vert_squish:
+        bbox_to_anchor = (0.45, -.55)
+    else:
+        bbox_to_anchor = (0.45, -.4)
     fsize = font_size - 2
 elif args.plot == 'all_4_sep':
     ncol = 4
     bbox_to_anchor = (0.5, -.425)
     fsize = font_size - 2
+    if args.force_vert_squish:
+        bbox_to_anchor = (0.5, -.54)
 else:
     ncol = 1
     bbox_to_anchor_dict = {
@@ -319,5 +353,9 @@ r_fig.legend(fancybox=True, shadow=True, fontsize=fsize, loc="lower center", nco
 
 fig_path += args.extra_name
 
+fig_name = 'r_fig.pdf'
+if args.force_vert_squish:
+    fig_name = f"squish_{fig_name}"
+
 os.makedirs(fig_path, exist_ok=True)
-r_fig.savefig(os.path.join(fig_path, 'r_fig.pdf'), bbox_inches='tight')
+r_fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')

@@ -20,6 +20,9 @@ parser.add_argument('--plot', type=str, default='main',
                     choices=['main', 'rce', 'hand', 'abl_expert', 'abl_alg', 'abl_dquant', 'rce_hand_theirs',
                              'abl_all', 'abl_exaug', 'hardest', 'hardest_4', 'real', 'hardest_5'])
 parser.add_argument('--extra_name', type=str, default="")
+parser.add_argument('--vertical_plot', action='store_true')
+parser.add_argument('--force_vert_squish', action='store_true')
+parser.add_argument('--bigger_labels', action='store_true')
 args = parser.parse_args()
 
 fig_name = f"{args.plot}_performance"
@@ -31,7 +34,6 @@ task_dir_names, valid_task, task_titles, main_task_i, num_aux, task_data_filenam
     st_num_eval_steps_to_use, eval_intervals, eval_eps_per_task = \
     plot_common.get_task_defaults(plot=args.plot)
 
-# algo_dir_names, algo_titles, multitask_algos, eval_eps_per_task, valid_algos, cmap_is = \
 algo_dir_names, algo_titles, multitask_algos, valid_algos, cmap_is = \
     plot_common.get_algo_defaults(plot=args.plot)
 
@@ -41,6 +43,8 @@ fig_shape, plot_size, num_stds, font_size, eval_interval, cmap, linewidth, std_a
 
 include_expert_baseline = False  # not going to use
 side_legend = True
+if args.vertical_plot:
+    fig_shape = [fig_shape[1], fig_shape[0]]
 
 if args.plot == 'rce':
     data_locs = rce_data_locations
@@ -61,6 +65,14 @@ else:
 # plt.rcParams.update({"font.family": "serif", "font.serif": "Times", "text.usetex": True, "pgf.rcfonts": False})
 plt.rcParams.update({"text.usetex": True, "font.family": "serif"})
 plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
+
+if args.force_vert_squish:
+    plot_size[0] = 4.2
+    font_size += 4
+
+if args.bigger_labels:
+    font_size += 2
+    linewidth *= 2
 
 s_fig, s_axes = plt.subplots(nrows=fig_shape[0], ncols=fig_shape[1],
                              figsize=[plot_size[0] * fig_shape[1], plot_size[1] * fig_shape[0]])
@@ -223,7 +235,10 @@ for task_i, task in enumerate(task_dir_names):
                 all_task_settings = {**plot_common.RCE_TASK_SETTINGS, **plot_common.HAND_TASK_SETTINGS}
                 ax.set_ylim(*all_task_settings[task]["return_ylims"])
             else:
-                ax.set_ylim(-.01, 1.01)
+                if args.plot == 'real':
+                    ax.set_ylim(-.03, 1.03)
+                else:
+                    ax.set_ylim(-.01, 1.01)
         else:
             # if custom defined limits, set them
             if args.plot == 'rce':
@@ -243,6 +258,11 @@ for task_i, task in enumerate(task_dir_names):
         max_tick = max_eval / x_val_scale
         tick_gap = max_tick / 5
         ax.set_xticks(np.arange(0.0, max_tick + .1, tick_gap))
+
+        if args.bigger_labels:
+            ax.tick_params(labelsize=font_size-7)
+        else:
+            ax.tick_params(labelsize=font_size-8)
 
         # set y ticks to smaller scale
         if args.plot == 'hand' and plot_type == 'r':
@@ -273,7 +293,10 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
     ax.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
     # ax.set_xlabel("Environment Steps (millions)", fontsize=font_size)
     # ax.set_xlabel("Environment Steps (hundred thousands)", fontsize=font_size)
-    ax.set_xlabel(r"Environment Steps ($\times$100k)", fontsize=label_font_size)
+    if args.bigger_labels:
+        ax.set_xlabel(r"Env. Steps ($\times$100k)", fontsize=label_font_size)
+    else:
+        ax.set_xlabel(r"Environment Steps ($\times$100k)", fontsize=label_font_size)
     # ax.xaxis.set_label_coords(.57, -.15)  # if we have the 10^6 scientific notation
 
     if 's_fig' in fig_name:
@@ -302,6 +325,11 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.81, 0.075))
     elif fig_shape == [2, 3]:
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(1.03, 0.3))
+    elif fig_shape == [2, 1]:
+        if args.bigger_labels:
+            fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.5, -0.18))
+        else:
+            fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.5, -0.16))
     elif fig_shape[0] == 2:
         if len(valid_algos) == 6:
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.81, 0.075))
@@ -336,6 +364,12 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
     # fig.tight_layout()
     # fig.subplots_adjust(top=.8, bottom=0.0)
     # plt.subplots_adjust(top=.65)
+
+    if args.vertical_plot:
+        fig_name = f"vert_{fig_name}"
+
+    if args.force_vert_squish:
+        fig_name = f"squish_{fig_name}"
 
     os.makedirs(fig_path, exist_ok=True)
     fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')
