@@ -3,6 +3,7 @@
 results/
 create_data/expert-data
 rce/exp_data
+.envrc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -32,7 +32,7 @@ parser.add_argument('--buffer_randomize_factor', type=float, default=0.0,
 parser.add_argument('--reward_scaling', type=float, default=0.1, help="Reward scaling.")
 
 # env
-parser.add_argument('--env_type', type=str, choices=['manipulator_learning', 'sawyer', 'hand_dapg'],
+parser.add_argument('--env_type', type=str, choices=['manipulator_learning', 'sawyer', 'hand_dapg', 'panda_rl_envs'],
                         default="manipulator_learning")
 parser.add_argument('--env_name', type=str, default="PandaPlayInsertTrayXYZState", help="Env name.")
 parser.add_argument('--main_task', type=str, default="stack", help="Main task (for play environment)")
@@ -48,6 +48,7 @@ parser.add_argument('--hand_dapg_dp_kwargs', type=str,
                     # default='control_hz:20,common_control_multiplier:.02,responsive_control:False,rotate_frame_ee:True,lower_mass:True,delta_pos:True,include_vel:False',
                     default='',
                     help="For overriding the defaults: e.g., 'control_hz:5,common_control_multiplier:.05'.")
+parser.add_argument('--panda_rl_envs_kwargs', type=str, default='', help="For overriding default env params.")
 
 # expert data
 parser.add_argument('--expert_data_mode', type=str, default="obs_only_no_next", help="options are [obs_act, obs_only, obs_only_no_next].")

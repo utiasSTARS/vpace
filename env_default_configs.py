@@ -5,7 +5,53 @@ def get_common_env_defaults(args):
     move_file = args.move_obj_filename
     ust = '_unstack-stack'
 
-    if args.env_type == c.MANIPULATOR_LEARNING:
+    if args.env_type == c.PANDA_RL_ENVS:
+        args.save_interval = 5000
+        args.eval_freq = 1000000  # no eval, do post eval on saved steps only?
+        args.print_interval = 1000000  # this causes a control delay, so effectively turning off
+        args.log_interval = 100
+        args.train_during_env_step = True
+        args.checkpoint_every_ep = True
+        args.buffer_warmup = 500
+        args.exploration_steps = 1000
+        args.frame_stack = 2
+        args.num_gradient_updates = 4
+        args.main_intention = 0
+        args.scheduler = 'wrs'
+
+        if 'Sim' not in args.env_name:
+            args.expert_dir_rest = 'expert_data/50_per_task'
+            args.expert_amounts = '50'
+
+        if 'PandaReach' in args.env_name:
+            args.max_steps = 50000
+            args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz'
+            args.scheduler_period = 25
+        elif 'SimPandaDoor' in args.env_name:
+            args.max_steps = 50000
+            args.expert_filenames = f'{args.env_name}.gz,{args.env_name}_reach.gz,{args.env_name}_grasp.gz'
+            args.scheduler_period = 10
+            args.scheduler = 'wrs_plus_handcraft'
+        elif 'PandaDrawer' in args.env_name or 'PandaDoor' in args.env_name:
+            # args.buffer_warmup = 200
+            # args.exploration_steps = 400
+            args.max_steps = 100000
+            data_env_name = args.env_name
+            if 'LongEp' in args.env_name:
+                data_env_name = args.env_name.split('LongEp')[0]
+            args.expert_filenames = f'{data_env_name}.gz,{data_env_name}_reach.gz,{data_env_name}_grasp.gz'
+            if 'Door' in args.env_name:
+                args.scheduler_period = 30
+            else:
+                args.scheduler_period = 20
+            args.scheduler = 'wrs_plus_handcraft'
+        else:
+            raise NotImplementedError(f"Not yet implemented for panda_rl_envs env {args.env_name}")
+
+        if args.single_task:
+            args.expert_filenames = args.expert_filenames.split(',')[0]
+
+    elif args.env_type == c.MANIPULATOR_LEARNING:
         ##### scheduler period, control freq
         if args.control_hz == 5:
             args.env_control_hz = 5
