@@ -1,7 +1,8 @@
 # Value-Penalized Auxiliary Control from Examples for Learning without Rewards or Demonstrations
 
-<p float="middle">
-  <img src="https://raw.githubusercontent.com/utiasSTARS/vpace/main/system-900dpi.png" width="75%" >
+<!-- <p float="middle"> -->
+<p align="center">
+  <img src="https://github.com/utiasSTARS/vpace/blob/main/system-900dpi.png" width="75%" >
 </p>
 
 This repository contains data, code, and instructions for reproducing the results from **v**alue-**p**enalized **a**uxiliary **c**ontrol from **e**xamples (VPACE).
