@@ -2,7 +2,7 @@
 
 <!-- <p float="middle"> -->
 <p align="center">
-  <img src="https://github.com/utiasSTARS/vpace/blob/main/system-900dpi.png" width="75%" >
+  <img src="https://github.com/utiasSTARS/vpace/blob/main/system-900dpi.png" width="90%" >
 </p>
 
 This repository contains data, code, and instructions for reproducing the results from **v**alue-**p**enalized **a**uxiliary **c**ontrol from **e**xamples (VPACE).
