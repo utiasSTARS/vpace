@@ -34,7 +34,8 @@ RCE_REG_VS_CLASS_DICT = OrderedDict({
 ALGO_TITLE_DICT = OrderedDict({
     'multi-sqil':{
         'title': 'VPACE-SQIL',
-        'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest', 'hardest_4'},
+        'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest',
+                  'hardest_4', 'real', 'hardest_5'},
         'cmap_i': 0,
     },
     'multi-disc':{
@@ -66,7 +67,7 @@ ALGO_TITLE_DICT = OrderedDict({
     },
     'sqil-no-vp':{
         'title': 'SQIL',
-        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_hand_theirs'},
+        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_hand_theirs', 'real', 'hardest_5'},
         # 'plots': {'main', 'rce'},
         'cmap_i': 7,
     },
@@ -169,6 +170,11 @@ TASK_LIST = [
     "insert_no_bring_no_move_0"
 ]
 
+REAL_PANDA_TASK_SETTINGS = OrderedDict({
+    "PandaDrawerLineLongEp": {'main_task_i': 0, 'eval_intervals': 5000},
+    "PandaDoorNoJamAngleLongEp": {'main_task_i': 0, 'eval_intervals': 5000},
+})
+
 PANDA_TASK_SETTINGS = OrderedDict({
     "reach_0": {'main_task_i': 1, 'eval_intervals': 10000},
     "lift_0": {'main_task_i': 2, 'eval_intervals': 10000},
@@ -237,11 +243,18 @@ HAND_TASK_SETTINGS = OrderedDict({
 
 AVG_ENVS_DICT = OrderedDict({
     'all': {
-        'valid_task_settings': {**PANDA_TASK_SETTINGS, **RCE_TASK_SETTINGS, **HAND_TASK_SETTINGS},
+        'valid_task_settings': {**PANDA_TASK_SETTINGS, **RCE_TASK_SETTINGS, **HAND_TASK_SETTINGS, **REAL_PANDA_TASK_SETTINGS},
         'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc'],
         # 'valid_algos': ['multi-sqil', 'multi-sqil-no-vp', 'sqil', 'sqil-no-vp', 'rce'],
         'title': "All Envs/Tasks (Average)",
         'num_timesteps_mean': 5,
+    },
+    'real': {
+        'valid_task_settings': {**REAL_PANDA_TASK_SETTINGS},
+        # 'valid_algos': ['multi-sqil', 'multi-disc', 'multi-sqil-no-vp', 'multi-rce', 'sqil', 'disc', 'sqil-no-vp', 'rce'],
+        'valid_algos': ['multi-sqil', 'sqil-no-vp'],
+        'title': "Real World Main Tasks",
+        'num_timesteps_mean': 1,
     },
     'main': {
         'valid_task_settings': {**PANDA_TASK_SETTINGS},
@@ -336,11 +349,18 @@ def get_success_return(
                 # folder structure is task/seed/algo/experiment_name/datetime
                 algo_dir, experiment_name = data_locations[task][algo].split('/')
 
-                data_path = os.path.join(experiment_root_dir, task, '1', algo_dir)
+                # hardcode for real panda envs
+                if task in REAL_PANDA_TASK_SETTINGS:
+                    loop_seeds = ['100']
+                else:
+                    loop_seeds = seeds
+
+                data_path = os.path.join(experiment_root_dir, task, loop_seeds[0], algo_dir)
                 if not os.path.exists(data_path):
                     print("No path found at %s for task %s algo %s, moving on in data cleaning" % (data_path, task, algo))
                     continue
-                for seed in seeds:
+
+                for seed in loop_seeds:
                     # data_path = os.path.join(root_dir, top_task_dirs[task_i],  seed, algo, experiment_name)
                     data_path = os.path.join(experiment_root_dir, task, seed, algo_dir, experiment_name)
 
@@ -424,10 +444,15 @@ def get_success_return(
                         # first cut out undesired eval steps
                         dat['raw'] = dat['raw'][:, :num_eval_steps_to_use_task]
 
-                        # dat['mean'] = dat['raw'][:, :num_eval_steps_to_use[task_i]].mean(axis=-1).mean(axis=0)
-                        # dat['std'] = dat['raw'][:, :num_eval_steps_to_use[task_i]].mean(axis=-1).std(axis=0)
-                        dat['mean'] = dat['raw'].mean(axis=-1).mean(axis=0)
-                        dat['std'] = dat['raw'].mean(axis=-1).std(axis=0)
+                        # hardcode for real robot envs -- i.e. only one seed
+                        if task in REAL_PANDA_TASK_SETTINGS:
+                            dat['mean'] = dat['raw'].mean(axis=-1)
+                            dat['std'] = np.zeros_like(dat['mean'])
+                        else:
+                            # dat['mean'] = dat['raw'][:, :num_eval_steps_to_use[task_i]].mean(axis=-1).mean(axis=0)
+                            # dat['std'] = dat['raw'][:, :num_eval_steps_to_use[task_i]].mean(axis=-1).std(axis=0)
+                            dat['mean'] = dat['raw'].mean(axis=-1).mean(axis=0)
+                            dat['std'] = dat['raw'].mean(axis=-1).std(axis=0)
 
                 except Exception as e:
                     print(f"Exception: {e}")
@@ -450,7 +475,7 @@ def get_success_return(
 def get_path_defaults(fig_name, task_inds=(0,1,2,3)):
     root_dir = os.environ['VPACE_TOP_DIR']
     fig_path = os.path.join(root_dir, "figures", fig_name)
-    experiment_root_dir = root_dir
+    experiment_root_dir = os.path.join(root_dir, 'results')
     seeds = ['1','2','3','4','5']
     expert_root = os.path.join(root_dir, "expert-data")
 
@@ -485,6 +510,17 @@ def get_task_defaults(plot='main'):
         eval_intervals = [10000, 10000, 10000, 25000, 25000, 25000, 25000]
         task_list = TASK_LIST
         eval_eps_per_task = [50] * len(task_titles)
+    elif plot == 'real':
+        valid_task = [True, True]
+        task_titles = ["RealDrawer", "RealDoor"]
+        main_task_i = [0, 0]
+        num_aux = [3, 3]
+        task_data_filenames = ['train.pkl', 'train.pkl']
+        num_eval_steps_to_use = [5, 10]
+        single_task_nestu = [5, 10]
+        eval_intervals = [5000, 5000]
+        task_list = ["PandaDrawerLineLongEp", "PandaDoorNoJamAngleLongEp"]
+        eval_eps_per_task = [10, 10]
     elif 'abl' in plot:
         valid_task = [True]
         task_titles = ["Unstack-Stack"]

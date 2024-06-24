@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import os
 
-from rl_sandbox.buffers.utils import make_buffer
+from rl_sandbox.buffers.utils import get_default_buffer
 
 import rl_sandbox.constants as c
 import rl_sandbox.envs.rce_envs as rce_envs
@@ -46,28 +46,7 @@ for env_name in env_names:
     (memory_size, obs_dim) = expert_obs.shape
     action_dim = tf_env.action_space.shape[0]
 
-    buffer_settings = {
-        c.KWARGS: {
-            c.MEMORY_SIZE: memory_size,
-            c.OBS_DIM: (obs_dim,),
-            c.H_STATE_DIM: (1,),
-            c.ACTION_DIM: (action_dim,),
-            c.REWARD_DIM: (1,),
-            c.INFOS: {c.MEAN: ((action_dim,), np.float32),
-                        c.VARIANCE: ((action_dim,), np.float32),
-                        c.ENTROPY: ((action_dim,), np.float32),
-                        c.LOG_PROB: ((1,), np.float32),
-                        c.VALUE: ((1,), np.float32),
-                        c.DISCOUNTING: ((1,), np.float32)},
-            c.CHECKPOINT_INTERVAL: 0,
-            c.CHECKPOINT_PATH: None,
-        },
-        c.STORAGE_TYPE: c.RAM,
-        c.BUFFER_TYPE: c.STORE_NEXT_OBSERVATION,
-        c.BUFFER_WRAPPERS: [],
-        c.LOAD_BUFFER: False,
-    }
-    buffer = make_buffer(buffer_settings)
+    buffer = get_default_buffer(memory_size, obs_dim, action_dim)
 
     for obs in expert_obs:
         info = {c.DISCOUNTING: 1}
