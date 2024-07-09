@@ -17,6 +17,7 @@ import plotting.common as plot_common
 import plotting.data_locations as data_locations
 import plotting.rce_env_data_locations as rce_env_data_locations
 import plotting.hand_dapg_data_locations as hand_dapg_data_locations
+import figures.cam_settings as cam_settings
 
 
 PANDA_SETTINGS_DICT = {
@@ -158,3 +159,25 @@ def img_caption(img, text, position=(250, 440), font_size=130):
     # import ipdb; ipdb.set_trace()
 
     return np.array(image)
+
+def set_cam(args, task, env):
+    if 'sawyer' in task or 'human' in task:
+        rgb_viewer = env.unwrapped._get_viewer('rgb_array')
+        cam_settings.set_cam_settings(rgb_viewer, cam_settings.CAM_SETTINGS[task])
+    else:
+        # allow rendering substeps in slightly hacky way
+        env.env.gripper._internal_substep_render_func = partial(
+            env.env.render, mode=args.panda_cam_str, substep_render=True)
+
+def get_ts_imgs(args, task, env, ts):
+    if 'sawyer' in task or 'human' in task:
+        img = env.unwrapped.render('rgb_array', width=args.img_w, height=args.img_h)
+        imgs = [img]
+    else:
+        if ts == 0:
+            img, _ = env.env.render(args.panda_cam_str)
+            imgs = [img]
+        else:
+            imgs = env.env.gripper._rendered_substeps  # see manipulator_wrapper.py
+
+    return imgs
