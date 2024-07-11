@@ -110,3 +110,17 @@ To generate plots and figures, you can use the scripts in `figures` and `plottin
 You may want to install some dependencies first with:
 
 1. `pip install -r reqs/fig_requirements.txt`
+
+# Citation
+If you find this repository useful for your work, please consider citing VPACE:
+<pre>
+@misc{ablett2024valuepenalizedauxiliarycontrolexamples,
+      title={Value-Penalized Auxiliary Control from Examples for Learning without Rewards or Demonstrations}, 
+      author={Trevor Ablett and Bryan Chan and Jayce Haoran Wang and Jonathan Kelly},
+      year={2024},
+      eprint={2407.03311},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2407.03311}, 
+}
+</pre>
