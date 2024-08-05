@@ -27,6 +27,10 @@ pip install -e lfgp/rl_sandbox
 ### Verifying Installation
 Run `salloc --time=0:20:00 --mem=3500 --gres=gpu:1 --account=def-<account>` and run the following:
 ```
+module load StdEnv/2020
+module load python/3.9.6
+module load mujoco/2.2.2
+module load cuda/11.4
 VENV_FOLDER="$HOME/vpace_env"
 DATA_FOLDER="$SLURM_TMPDIR/data"  # for copied starting data
 REPO_PATH="$HOME/src/vpace/vpace"

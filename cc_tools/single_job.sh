@@ -8,6 +8,10 @@
 #SBATCH --output=/home/chanb/scratch/vpace/run_reports/%N-%j.out  # %N for node name, %j for jobID
 
 # hardcoded folders
+module load StdEnv/2020
+module load python/3.9.6
+module load mujoco/2.2.2
+module load cuda/11.4
 VENV_FOLDER="$HOME/vpace_env"
 DATA_FOLDER="$SLURM_TMPDIR/data"  # for copied starting data
 REPO_PATH="$HOME/src/vpace/vpace"
