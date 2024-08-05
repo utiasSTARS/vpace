@@ -10,7 +10,7 @@ echo "Starting for loop of execution with args $@"
 for seed in "${seeds[@]}"; do
     echo "Running seed ${seed}, args $@"
 
-    python ../run_vpace.py \
+    python run_vpace.py \
         --seed "${seed}" \
         "$@"
 done
