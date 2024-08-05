@@ -1,4 +1,6 @@
 # Running on Compute Canada
+Assume that `lfgp` and `vpace` are saved under `$HOME/src/vpace`.
+
 ## Installation
 ```
 module load StdEnv/2020
