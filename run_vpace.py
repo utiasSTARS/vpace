@@ -106,6 +106,7 @@ parser.add_argument('--sqil_policy_reward_label', type=float, choices=[0.0, -1.0
                         help="Reward label for policy data in SQIL, if not using classifier.")
 parser.add_argument('--move_obj_filename', type=str, choices=['5_move.gz', '5_move_new.gz'], default='5_move_new.gz',
                     help="Name of move-object expert data file. new is a better match for 5hz env.")
+parser.add_argument('--threshold_discriminator', action="store_true")
 parser.add_argument('--q_regularizer', type=str, choices=['vp', 'cql', 'c2f'], default="vp")
 parser.add_argument('--q_over_max_penalty', type=float, default=0.0,
                         help="If set, a multiplier on the q magnitude over the max possible q based on max reward of 1, "\
