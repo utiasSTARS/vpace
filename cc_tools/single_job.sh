@@ -28,6 +28,7 @@ cp -R "$SRC_DATA_PATH" "$DATA_FOLDER"
 source "$VENV_FOLDER/bin/activate"
 
 # python $HOME/my_projects/lfgp-internal/scripts/lfebp/run_lfebp.py \
+echo --expert_top_dir "${DATA_FOLDER}" --top_save_path "${SAVE_PATH}" "$@"
 python $REPO_PATH/run_vpace.py \
   --expert_top_dir "${DATA_FOLDER}" \
   --top_save_path "${SAVE_PATH}" \

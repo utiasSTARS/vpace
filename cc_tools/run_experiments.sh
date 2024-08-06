@@ -22,7 +22,7 @@ elif [ "${main_task}" = "unstack" ] || [ "${main_task}" = "unstack_nm" ]; then
     if [ ${task_mode} = "st" ]; then
         req_time="00-18:00"
     else
-        req_time="00-12:00"
+        req_time="00-24:00"
     fi
 elif [ "${main_task}" = "insert_nb" ] || [ "${main_task}" = "insert_nb_nm" ]; then
     if [ ${task_mode} = "st" ]; then
