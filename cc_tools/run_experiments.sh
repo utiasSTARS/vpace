@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# e.g. bash all-seeds.sh stack_nm mt feb17 sqil --exp_name feb17
-# e.g. bash all-seeds.sh stack_nm st feb17 sqil --exp_name feb17
-# e.g. bash all-seeds.sh stack_nm mt feb17 rce --exp_name feb17
-# e.g. bash all-seeds.sh stack_nm mt feb17 discriminator --exp_name feb17
+# e.g. bash run_experiments.sh stack_nm mt feb17 sqil --exp_name feb17
+# e.g. bash run_experiments.sh stack_nm st feb17 sqil --exp_name feb17
+# e.g. bash run_experiments.sh stack_nm mt feb17 rce --exp_name feb17
+# e.g. bash run_experiments.sh stack_nm mt feb17 discriminator --exp_name feb17
 
 seeds=(1 2 3 4 5)
 # seeds=(1)
