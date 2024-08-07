@@ -7,29 +7,22 @@
 #SBATCH --time=00-12:00      # time (DD-HH:MM)
 #SBATCH --output=/home/chanb/scratch/vpace/run_reports/%N-%j.out  # %N for node name, %j for jobID
 
-# hardcoded folders
+# loading mujoco stuff
 module load StdEnv/2020
 module load python/3.9.6
 module load mujoco/2.2.2
 module load cuda/11.4
+
+# hardcoded folders
 VENV_FOLDER="$HOME/vpace_env"
-DATA_FOLDER="$SLURM_TMPDIR/data"  # for copied starting data
 REPO_PATH="$HOME/src/vpace/vpace"
-SRC_DATA_PATH="$REPO_PATH/expert_data"
 SAVE_PATH="$HOME/scratch/vpace"
 export VPACE_TOP_DIR="$REPO_PATH"
 
-# untar data to compute node
-mkdir -p "$DATA_FOLDER"
-cp -R "$SRC_DATA_PATH" "$DATA_FOLDER"
-
-# gen and/or start environment
-# source gen_venv.sh cc_reqs.txt custom_reqs.txt  # source ensures that now we'll be running the new python env
 source "$VENV_FOLDER/bin/activate"
 
-# python $HOME/my_projects/lfgp-internal/scripts/lfebp/run_lfebp.py \
-echo --expert_top_dir "${DATA_FOLDER}" --top_save_path "${SAVE_PATH}" "$@"
+echo --expert_top_dir "${REPO_PATH}" --top_save_path "${SAVE_PATH}" "$@"
 python $REPO_PATH/run_vpace.py \
-  --expert_top_dir "${DATA_FOLDER}" \
+  --expert_top_dir "${REPO_PATH}" \
   --top_save_path "${SAVE_PATH}" \
   "$@"
