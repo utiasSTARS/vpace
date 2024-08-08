@@ -37,11 +37,11 @@ Run `run_experiments.sh` to kick off an experiment with 5 seeds.
 The script takes in four arguments:
 - `main_task`: The task to run
 - `task_mode`: Single task or multitask
-- `job_name_post`: The experiment name for logging
+- `exp_name`: The experiment name for logging
 - `algo`: The reward model
 
 Optionally, you may include extra arguments for the code.
 For example, if we want to use value penalization with $\lambda = 1$:
 ```
-bash run_experiments.sh stack_nm mt vp_exp sqil --exp_name vp_exp --q_over_max_penalty 1.0 --q_regularizer vp
+bash run_experiments.sh stack_nm mt vp_exp sqil --q_over_max_penalty 1.0 --q_regularizer vp
 ```
