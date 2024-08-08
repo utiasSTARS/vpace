@@ -12,7 +12,7 @@ task_mode="$2"  # st or mt for single or multitask
 job_name_post="$3"
 algo="$4"
 
-if [ "${main_task}" = "stack" ] || [ "${main_task}" = "bring" ] || [ "${main_task}" = "stack_nm" ] || [ "${main_task}" = "bring_nm" ]; then
+if [ "${main_task}" = "lift" ] ||[ "${main_task}" = "move" ] ||[ "${main_task}" = "reach" ] ||[ "${main_task}" = "stack" ] || [ "${main_task}" = "bring" ] || [ "${main_task}" = "stack_nm" ] || [ "${main_task}" = "bring_nm" ]; then
     if [ ${task_mode} = "st" ]; then
         req_time="00-12:00"
     else
