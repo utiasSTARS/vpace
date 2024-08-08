@@ -26,6 +26,7 @@ parser.add_argument('--stddev_type', type=str, choices=['none', 'by_task', 'by_s
                     help="by_task is standard deviation of mean task performance, "\
                          "by_seed_mean is the mean of each tasks across-seed std dev.")
 parser.add_argument('--force_vert_squish', action='store_true')
+parser.add_argument('--real_x_axis', action='store_true')
 args = parser.parse_args()
 
 fig_name = f"{args.plot}_envs_avg"
@@ -73,6 +74,10 @@ fig_shape, plot_size, num_stds, font_size, _, cmap, linewidth, std_alpha, x_val_
     include_expert_baseline, _ = \
     plot_common.get_fig_defaults(num_plots=num_plots)
 num_stds = 0.25
+
+# hardcoded options for real_x_axis
+x_val_scale = 100000
+eval_cutoff_env_step = 500000
 #####################################################################################################################
 
 if args.force_vert_squish:
@@ -130,10 +135,15 @@ for plot_i, r_ax in enumerate(r_axes_flat):
     num_timesteps_mean = num_timesteps_means[plot_i]
 
     # first find the max number of eval timsteps of any task, to decide what we'll interpolate all to
+    # also find min eval interval
     max_eval_steps = 0
+    max_eval = 0
+    min_eval_interval = 25000
     for task in valid_task_settings.keys():
         eval_steps = all_returns[task][valid_algos[0]]['raw'].shape[1]
         max_eval_steps = max(eval_steps, max_eval_steps)
+        max_eval = max(max_eval, max_eval_steps * all_valid_task_settings[task]['eval_intervals'])
+        min_eval_interval = min(min_eval_interval, all_valid_task_settings[task]['eval_intervals'])
 
     # all_rets_norm = copy.deepcopy(all_returns)
     across_task_rets = {}
@@ -193,68 +203,153 @@ for plot_i, r_ax in enumerate(r_axes_flat):
             else:
                 all_sucs_norm_interp[task][algo] = {}
 
-            # then normalize the eval timesteps with interpolation and the max_eval_steps
             # hardcode for real robot envs, no seed index
             if task in real_task_settings:
                 num_eval_steps = all_returns[task][algo]['raw'].shape[0]
             else:
                 num_eval_steps = all_returns[task][algo]['raw'].shape[1]
-            if num_eval_steps < max_eval_steps:
-                if task in panda_task_settings:
-                    eval_interval = panda_task_settings[task]['eval_intervals']
-                elif task in real_task_settings:
-                    eval_interval = 5000
-                else:
-                    eval_interval = 10000
 
-                orig_x = np.arange(1, num_eval_steps + 1) * eval_interval
-                new_x = np.arange(1, max_eval_steps + 1) * eval_interval
-
-                # expand orig_x to have same min and max as new x
-                orig_x_new_max = (new_x.max() - new_x.min()) / (orig_x.max() - orig_x.min()) * \
-                                (orig_x - orig_x.min()) + new_x.min()
-
-                if task not in panda_task_settings and task not in real_task_settings:
-                    all_rets_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['mean'])
-                    all_rets_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['std'])
-
-                else:
-                    try:
-                        all_sucs_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['mean'])
-                        all_sucs_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['std'])
-                    except:
-                        import ipdb; ipdb.set_trace()
-
-            else:
-                if task not in panda_task_settings and task not in real_task_settings:
-                    all_rets_norm_interp[task][algo]['mean'] = all_rets_norm[task][algo]['mean']
-                    all_rets_norm_interp[task][algo]['std'] = all_rets_norm[task][algo]['std']
-
-                else:
-                    all_sucs_norm_interp[task][algo]['mean'] = all_successes[task][algo]['mean']
-                    all_sucs_norm_interp[task][algo]['std'] = all_successes[task][algo]['std']
-
-            # put across-task data together
             if algo not in across_task_rets: across_task_rets[algo] = {'means': [], 'stds': []}
 
-            if task in panda_task_settings or task in real_task_settings:
-                across_task_rets[algo]['means'].append(all_sucs_norm_interp[task][algo]['mean'])
-                across_task_rets[algo]['stds'].append(all_sucs_norm_interp[task][algo]['std'])
+            if args.real_x_axis:
+                # 1. interpolate everything to shortest eval intervals, keeping true max timestep the same
+
+                # interpolate everything, but this is a non-op for tasks that already have min_eval_interval
+                eval_interval = all_valid_task_settings[task]['eval_intervals']
+                orig_final_step = eval_interval * num_eval_steps + 1
+                orig_x = np.arange(eval_interval, orig_final_step, eval_interval)
+                new_x = np.arange(min_eval_interval, orig_final_step, min_eval_interval)
+
+                if task not in panda_task_settings and task not in real_task_settings:
+                    task_rets_mean = all_rets_norm[task][algo]['mean']
+                    task_rets_std = all_rets_norm[task][algo]['std']
+                else:
+                    task_rets_mean = all_successes[task][algo]['mean']
+                    task_rets_std = all_successes[task][algo]['std']
+
+                across_task_rets[algo]['means'].append(np.interp(new_x, orig_x, task_rets_mean))
+                across_task_rets[algo]['stds'].append(np.interp(new_x, orig_x, task_rets_std))
+
             else:
-                across_task_rets[algo]['means'].append(all_rets_norm_interp[task][algo]['mean'])
-                across_task_rets[algo]['stds'].append(all_rets_norm_interp[task][algo]['std'])
+
+                # then normalize the eval timesteps with interpolation and the max_eval_steps
+                if num_eval_steps < max_eval_steps:
+                    eval_interval = all_valid_task_settings[task]['eval_intervals']
+                    # if task in panda_task_settings:
+                    #     eval_interval = panda_task_settings[task]['eval_intervals']
+                    # elif task in real_task_settings:
+                    #     eval_interval = 5000
+                    # else:
+                    #     eval_interval = 10000
+
+                    orig_x = np.arange(1, num_eval_steps + 1) * eval_interval
+                    new_x = np.arange(1, max_eval_steps + 1) * eval_interval
+
+                    # expand orig_x to have same min and max as new x
+                    orig_x_new_max = (new_x.max() - new_x.min()) / (orig_x.max() - orig_x.min()) * \
+                                    (orig_x - orig_x.min()) + new_x.min()
+
+                    if task not in panda_task_settings and task not in real_task_settings:
+                        all_rets_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['mean'])
+                        all_rets_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['std'])
+
+                    else:
+                        try:
+                            all_sucs_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['mean'])
+                            all_sucs_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['std'])
+                        except:
+                            import ipdb; ipdb.set_trace()
+
+                else:
+                    if task not in panda_task_settings and task not in real_task_settings:
+                        all_rets_norm_interp[task][algo]['mean'] = all_rets_norm[task][algo]['mean']
+                        all_rets_norm_interp[task][algo]['std'] = all_rets_norm[task][algo]['std']
+
+                    else:
+                        all_sucs_norm_interp[task][algo]['mean'] = all_successes[task][algo]['mean']
+                        all_sucs_norm_interp[task][algo]['std'] = all_successes[task][algo]['std']
+
+                # put across-task data together
+                if task in panda_task_settings or task in real_task_settings:
+                    across_task_rets[algo]['means'].append(all_sucs_norm_interp[task][algo]['mean'])
+                    across_task_rets[algo]['stds'].append(all_sucs_norm_interp[task][algo]['std'])
+                else:
+                    across_task_rets[algo]['means'].append(all_rets_norm_interp[task][algo]['mean'])
+                    across_task_rets[algo]['stds'].append(all_rets_norm_interp[task][algo]['std'])
 
     # plot the means
     for algo in valid_algos:
-        all_means = np.array(across_task_rets[algo]['means']).T
-        all_stds = np.array(across_task_rets[algo]['stds']).T
+        if args.real_x_axis:
+            # 2. take across-task means at every timestep, regardless of number of tasks that have a value
+            #    at that timestep...likely will need to be done in a loop since array would be ragged
 
-        if num_timesteps_mean > 1:
-            convolv_op = np.ones(num_timesteps_mean) / num_timesteps_mean
-            all_means = convolve1d(all_means, convolv_op, axis=0, mode='nearest')
-            all_stds = convolve1d(all_stds, convolv_op, axis=0, mode='nearest')
+            # convolve must be done one task at a time, since each task is a different length now
+            if num_timesteps_mean > 1:
+                convolv_op = np.ones(num_timesteps_mean) / num_timesteps_mean
+                across_task_rets_smoothed = {'means': [], 'stds': []}
+                for task_algo_means, task_algo_stds in zip(across_task_rets[algo]['means'], across_task_rets[algo]['stds']):
+                    across_task_rets_smoothed['means'].append(convolve1d(task_algo_means, convolv_op, mode='nearest'))
+                    across_task_rets_smoothed['stds'].append(convolve1d(task_algo_stds, convolv_op, mode='nearest'))
+                across_task_rets[algo] = across_task_rets_smoothed
 
-        norm_eval_steps = np.linspace(0, 1, max_eval_steps)
+            # get per timestep means -- start by getting longest array, should be max_eval / min_eval_interval
+            max_new_eval_steps = 0
+            for task_algo_means in across_task_rets[algo]['means']:
+                max_new_eval_steps = max(max_new_eval_steps, len(task_algo_means))
+
+            # get per timestep mean, since each task is different length
+            import awkward as ak
+            ak_across_task_rets_means = ak.Array(across_task_rets[algo]['means'])
+            ak_across_task_rets_stds = ak.Array(across_task_rets[algo]['stds'])
+
+            mean = np.zeros(max_new_eval_steps,)
+            std = np.zeros(max_new_eval_steps,)
+
+            for i in range(max_new_eval_steps):
+                timestep_means = ak_across_task_rets_means[ak.num(ak_across_task_rets_means) > i, i].to_numpy()
+                mean[i] = timestep_means.mean()
+                raw_stds = ak_across_task_rets_stds[ak.num(ak_across_task_rets_stds) > i, i].to_numpy().mean()
+                if args.stddev_type != 'none':
+                    if args.stddev_type == 'by_task':
+                        if len(timestep_means) >= 3:  # only take std of means of we have at least a few valid tasks
+                            std[i] = timestep_means.std()
+                        else:
+                            std[i] = raw_stds.mean()
+                    elif args.stddev_type == 'by_seed_mean':
+                        std = raw_stds.mean()
+
+            # overwrite max steps if we want to stop it sooner
+            if 'eval_cutoff_env_step' in plot_common.AVG_ENVS_DICT[args.plot]:
+                eval_cutoff_env_step = plot_common.AVG_ENVS_DICT[args.plot]['eval_cutoff_env_step']
+                max_eval = eval_cutoff_env_step
+                max_new_eval_steps = int(eval_cutoff_env_step / min_eval_interval)
+                mean = mean[:max_new_eval_steps]
+                std = std[:max_new_eval_steps]
+
+            norm_eval_steps = np.arange(min_eval_interval, max_new_eval_steps * min_eval_interval + 1,
+                                        min_eval_interval) / x_val_scale
+
+            max_tick = max_eval / x_val_scale
+            tick_gap = max_tick / 5
+            r_ax.set_xticks(np.arange(0.0, max_tick + .1, tick_gap))
+
+        else:
+            all_means = np.array(across_task_rets[algo]['means']).T
+            all_stds = np.array(across_task_rets[algo]['stds']).T
+
+            if num_timesteps_mean > 1:
+                convolv_op = np.ones(num_timesteps_mean) / num_timesteps_mean
+                all_means = convolve1d(all_means, convolv_op, axis=0, mode='nearest')
+                all_stds = convolve1d(all_stds, convolv_op, axis=0, mode='nearest')
+
+            norm_eval_steps = np.linspace(0, 1, max_eval_steps)
+
+            mean = all_means.mean(axis=-1)
+            if args.stddev_type != 'none':
+                if args.stddev_type == 'by_task':
+                    std = all_means.std(axis=-1)
+                elif args.stddev_type == 'by_seed_mean':
+                    std = all_stds.mean(axis=-1)
 
         if 'multi' in algo:
             line_style = '-'
@@ -263,7 +358,6 @@ for plot_i, r_ax in enumerate(r_axes_flat):
         else:
             line_style = '--'
 
-        mean = all_means.mean(axis=-1)
         color = cmap(plot_common.ALGO_TITLE_DICT[algo]['cmap_i'])
 
         if plot_i == 0:
@@ -280,13 +374,7 @@ for plot_i, r_ax in enumerate(r_axes_flat):
             label = None
 
         r_ax.plot(norm_eval_steps, mean, label=label, color=color, linewidth=linewidth, linestyle=line_style)
-
         if args.stddev_type != 'none':
-            if args.stddev_type == 'by_task':
-                std = all_means.std(axis=-1)
-            elif args.stddev_type == 'by_seed_mean':
-                std = all_stds.mean(axis=-1)
-
             r_ax.fill_between(norm_eval_steps, mean - num_stds * std, mean + num_stds * std, facecolor=color,
                             alpha=std_alpha)
 
@@ -294,7 +382,10 @@ for plot_i, r_ax in enumerate(r_axes_flat):
     # pretty/labels
     r_ax.set_title(plot_title, fontsize=font_size)
     if args.plot != 'all_4_sep':
-        r_ax.set_xlabel('Steps (normalized)', fontsize=font_size + 2)
+        if args.real_x_axis:
+            r_ax.set_xlabel(r"Env. Steps ($\times$100k)", fontsize=font_size + 2)
+        else:
+            r_ax.set_xlabel('Steps (normalized)', fontsize=font_size + 2)
 
     # if args.plot == 'main' or (args.plot == 'all_4_sep' and plot_i == 0):
     #     r_ax.set_ylabel('Success Rate', fontsize=font_size - 2)
@@ -304,7 +395,8 @@ for plot_i, r_ax in enumerate(r_axes_flat):
             r_ax.set_ylabel('Return (normalized)', fontsize=font_size + 2)
     else:
         r_ax.set_ylabel('Return (normalized)', fontsize=font_size + 2)
-    r_ax.set_xlim([0, 1])
+    if not args.real_x_axis:
+        r_ax.set_xlim([0, 1])
     r_ax.set_ylim([0, 1])
     r_ax.grid(alpha=0.5, which='both')
 
@@ -313,8 +405,10 @@ for plot_i, r_ax in enumerate(r_axes_flat):
 if args.plot == 'all_4_sep':
     ax = r_fig.add_subplot(111, frameon=False)
     ax.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-    ax.set_xlabel("Steps (normalized)", fontsize=font_size + 2)
-
+    if args.real_x_axis:
+        ax.set_xlabel(r"Env. Steps ($\times$100k)", fontsize=font_size + 2)
+    else:
+        ax.set_xlabel("Steps (normalized)", fontsize=font_size + 2)
 
 bbox_to_anchor_dict = {
     2: (0.45, -.4),
@@ -356,6 +450,8 @@ fig_path += args.extra_name
 fig_name = 'r_fig.pdf'
 if args.force_vert_squish:
     fig_name = f"squish_{fig_name}"
+if args.real_x_axis:
+    fig_name = f"real_x_{fig_name}"
 
 os.makedirs(fig_path, exist_ok=True)
 r_fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')

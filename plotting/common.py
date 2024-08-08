@@ -190,54 +190,66 @@ PANDA_TASK_SETTINGS = OrderedDict({
 RCE_TASK_SETTINGS = OrderedDict({
     "sawyer_drawer_open":{
         "valid": True,
-        "return_ylims": [-.01, .14]
+        "return_ylims": [-.01, .14],
+        "eval_intervals": 10000,
     },
     "sawyer_drawer_close":{
         "valid": True,
-        "return_ylims": [-.01, .2]
+        "return_ylims": [-.01, .2],
+        "eval_intervals": 10000,
     },
     "sawyer_push": {
         "valid": True,
-        "return_ylims": [-.01, .26]
+        "return_ylims": [-.01, .26],
+        "eval_intervals": 10000,
     },
     "sawyer_lift": {
         "valid": True,
-        "return_ylims": [-.01, .07]
+        "return_ylims": [-.01, .07],
+        "eval_intervals": 10000,
     },
     "sawyer_box_close": {
         "valid": True,
-        "return_ylims": [-.01, .27]
+        "return_ylims": [-.01, .27],
+        "eval_intervals": 10000,
     },
     "sawyer_bin_picking":{
         "valid": True,
-        "return_ylims": [-.01, .22]
+        "return_ylims": [-.01, .22],
+        "eval_intervals": 10000,
     },
 })
 
 HAND_TASK_SETTINGS = OrderedDict({
     "door-human-v0-dp": {
         "valid": True,
-        "return_ylims": [-.1e3, 1.5e3]
+        "return_ylims": [-.1e3, 1.5e3],
+        "eval_intervals": 10000,
     },
     "hammer-human-v0-dp": {
         "valid": True,
-        "return_ylims": [-.4e3, 3e3]
+        "return_ylims": [-.4e3, 3e3],
+        "eval_intervals": 10000,
     },
     "relocate-human-v0-najp-dp": {
         "valid": True,
-        "return_ylims": [-.1e3, 2.3e3]
+        "return_ylims": [-.1e3, 2.3e3],
+        "eval_intervals": 10000,
     },
     "door-human-v0": {
         "valid": True,
-        "return_ylims": [-.1e3, 3.1e3]
+        "return_ylims": [-.1e3, 3.1e3],
+        "eval_intervals": 10000,
     },
     "hammer-human-v0": {
         "valid": True,
-        "return_ylims": [-.1e4, 1e4]
+        "return_ylims": [-.1e4, 1e4],
+        "eval_intervals": 10000,
     },
     "relocate-human-v0": {
         "valid": True,
-        "return_ylims": [-.1e3, 2.5e3]
+        "return_ylims": [-.1e3, 2.5e3],
+        "eval_intervals": 10000,
     }
 })
 
@@ -248,6 +260,7 @@ AVG_ENVS_DICT = OrderedDict({
         # 'valid_algos': ['multi-sqil', 'multi-sqil-no-vp', 'sqil', 'sqil-no-vp', 'rce'],
         'title': "All Envs/Tasks (Average)",
         'num_timesteps_mean': 5,
+        'eval_cutoff_env_step': 500000,
     },
     'real': {
         'valid_task_settings': {**REAL_PANDA_TASK_SETTINGS},
@@ -262,6 +275,7 @@ AVG_ENVS_DICT = OrderedDict({
         'valid_algos': ['multi-sqil', 'sqil', 'multi-disc', 'disc', 'multi-sqil-no-vp', 'sqil-no-vp', 'multi-rce', 'rce'],
         'title': "Panda Main Tasks",
         'num_timesteps_mean': 10,
+        'eval_cutoff_env_step': 500000,
     },
     'rce': {
         'valid_task_settings': {**RCE_TASK_SETTINGS},
@@ -269,6 +283,7 @@ AVG_ENVS_DICT = OrderedDict({
         'valid_algos': ['multi-sqil', 'sqil', 'multi-disc', 'disc', 'multi-sqil-no-vp', 'sqil-no-vp', 'multi-rce', 'rce'],
         'title': "Sawyer Main Tasks",
         'num_timesteps_mean': 10,
+        'eval_cutoff_env_step': 500000,
     },
     'hand': {
         'valid_task_settings': {**HAND_TASK_SETTINGS},
@@ -276,6 +291,7 @@ AVG_ENVS_DICT = OrderedDict({
         'valid_algos': ['multi-sqil', 'sqil', 'multi-disc', 'disc', 'multi-sqil-no-vp', 'sqil-no-vp', 'multi-rce', 'rce'],
         'title': "Adroit Main Tasks",
         'num_timesteps_mean': 15,
+        'eval_cutoff_env_step': 500000,
     },
     'hand_orig': {
         'valid_task_settings': {
@@ -286,6 +302,7 @@ AVG_ENVS_DICT = OrderedDict({
         'valid_algos': ['multi-sqil', 'sqil', 'multi-disc', 'disc', 'multi-sqil-no-vp', 'sqil-no-vp', 'multi-rce', 'rce'],
         'title': "Adroit Main Tasks",
         'num_timesteps_mean': 15,
+        'eval_cutoff_env_step': 500000,
     },
     'hand_dp': {
         'valid_task_settings': {
@@ -297,6 +314,7 @@ AVG_ENVS_DICT = OrderedDict({
         'valid_algos': ['multi-sqil', 'sqil', 'multi-disc', 'disc', 'multi-sqil-no-vp', 'sqil-no-vp', 'multi-rce', 'rce'],
         'title': "Adroit DP Main Tasks",
         'num_timesteps_mean': 15,
+        'eval_cutoff_env_step': 500000,
     },
     'rce_env_mods': {
         'valid_task_settings': {
@@ -309,6 +327,9 @@ AVG_ENVS_DICT = OrderedDict({
         'title': "RCE Sawyer and Hand Tasks",
         'num_timesteps_mean': 15,
     },
+    'all_4_sep': {
+        'eval_cutoff_env_step': 500000,
+    }
 })
 
 def get_success_return(
@@ -601,6 +622,22 @@ def get_task_defaults(plot='main'):
                        'sawyer_box_close',
                        'relocate-human-v0-najp-dp']
         eval_eps_per_task = [50, 50, 30, 30]
+    elif plot == 'panda_3':
+        task_titles = ['Unstack-Stack',
+                       'Insert',
+                       'sawyer_box_close']  # TODO this is going to be avg for panda envs, this is a placeholder
+        num_tasks = len(task_titles)
+        valid_task = [True] * len(task_titles)
+        main_task_i = [2, 2, 0]
+        num_aux = [5, 5, 3]
+        task_data_filenames = ['train.pkl'] * num_tasks
+        num_eval_steps_to_use = [20, 40, 50]
+        single_task_nestu = num_eval_steps_to_use
+        eval_intervals = [25000, 25000, 10000]
+        task_list = ['unstack_stack_env_only_no_move_0',
+                       'insert_no_bring_no_move_0',
+                       'sawyer_box_close']
+        eval_eps_per_task = [50, 50, 30]
 
     out_tdn = []
     out_vt = []
