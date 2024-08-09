@@ -9,6 +9,12 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 
+CUSTOM_ALGO_LIST_DICT = {
+    'overall': ['multi-sqil', 'sqil-no-vp', 'disc', 'rce'],
+    'overall_and_ace': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'disc', 'rce']
+}
+
+
 RCE_REG_VS_CLASS_DICT = OrderedDict({
     'multi-sqil':{
         'title': 'VPACE (reg-loss)'
@@ -35,7 +41,7 @@ ALGO_TITLE_DICT = OrderedDict({
     'multi-sqil':{
         'title': 'VPACE-SQIL',
         'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest',
-                  'hardest_4', 'real', 'hardest_5'},
+                  'hardest_4', 'real', 'hardest_5', 'panda_3_overall', 'panda_3_hardest_overall', 'best_4_overall'},
         'cmap_i': 0,
     },
     'multi-disc':{
@@ -62,18 +68,21 @@ ALGO_TITLE_DICT = OrderedDict({
     },
     'disc':{
         'title': 'VP-DAC',
-        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4'},
+        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'panda_3_overall', 'panda_3_hardest_overall'
+                  , 'best_4_overall'},
         'cmap_i': 3,
     },
     'sqil-no-vp':{
         'title': 'SQIL',
-        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_hand_theirs', 'real', 'hardest_5'},
+        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_hand_theirs', 'real', 'hardest_5', 'panda_3_overall',
+                  'panda_3_hardest_overall', 'best_4_overall'},
         # 'plots': {'main', 'rce'},
         'cmap_i': 7,
     },
     'rce':{
         'title': 'RCE',
-        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_env_mods'},
+        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_env_mods', 'panda_3_overall', 'panda_3_hardest_overall',
+                   'best_4_overall'},
         # 'plots': {'main', 'rce'},
         'cmap_i': 5,
     },
@@ -168,6 +177,13 @@ TASK_LIST = [
     "unstack_stack_env_only_no_move_0",
     "bring_no_move_0",
     "insert_no_bring_no_move_0"
+]
+
+AVGS_TASK_LIST = [
+    'Panda Main Tasks',
+    'Sawyer Main Tasks',
+    'Adroit Main Tasks',
+    'Adroit DP Main Tasks'
 ]
 
 REAL_PANDA_TASK_SETTINGS = OrderedDict({
@@ -353,7 +369,7 @@ def get_success_return(
         all_returns = dict.fromkeys(task_dir_names)
         all_successes = dict.fromkeys(task_dir_names)
         for task_i, task in enumerate(task_dir_names):
-            if not valid_task[task_i]:
+            if not valid_task[task_i] or task in AVGS_TASK_LIST:
                 print(f"Task {task} set to false in valid_task, skipping")
                 continue
             all_successes[task] = { algo : dict(raw=[], mean=[], std=[]) for algo in algo_dir_names }
@@ -622,22 +638,74 @@ def get_task_defaults(plot='main'):
                        'sawyer_box_close',
                        'relocate-human-v0-najp-dp']
         eval_eps_per_task = [50, 50, 30, 30]
-    elif plot == 'panda_3':
+    elif plot == 'panda_3_overall':
         task_titles = ['Unstack-Stack',
                        'Insert',
-                       'sawyer_box_close']  # TODO this is going to be avg for panda envs, this is a placeholder
+                       'Panda Main Tasks (Avg)']
         num_tasks = len(task_titles)
         valid_task = [True] * len(task_titles)
-        main_task_i = [2, 2, 0]
-        num_aux = [5, 5, 3]
+        main_task_i = [2, 2, 2]
+        num_aux = [5, 5, 5]
         task_data_filenames = ['train.pkl'] * num_tasks
-        num_eval_steps_to_use = [20, 40, 50]
+        num_eval_steps_to_use = [20, 40, 20]
         single_task_nestu = num_eval_steps_to_use
         eval_intervals = [25000, 25000, 10000]
         task_list = ['unstack_stack_env_only_no_move_0',
                        'insert_no_bring_no_move_0',
-                       'sawyer_box_close']
-        eval_eps_per_task = [50, 50, 30]
+                       'none']
+        eval_eps_per_task = [50, 50, 50]
+    elif plot == 'panda_3_hardest_overall':
+        task_titles = ['Stack',
+                       'Unstack-Stack',
+                       'Insert']
+        num_tasks = len(task_titles)
+        valid_task = [True] * len(task_titles)
+        main_task_i = [2, 2, 2]
+        num_aux = [5, 5, 5]
+        task_data_filenames = ['train.pkl'] * num_tasks
+        num_eval_steps_to_use = [20, 20, 40]
+        single_task_nestu = num_eval_steps_to_use
+        eval_intervals = [25000, 25000, 25000]
+        task_list = ['stack_no_move_0',
+                       'unstack_stack_env_only_no_move_0',
+                       'insert_no_bring_no_move_0']
+        eval_eps_per_task = [50, 50, 50]
+    elif plot == 'best_4_overall':
+        task_titles = ['sawyer_bin_picking',
+                       'hammer-human-v0-dp',
+                       'Unstack-Stack',
+                       'Insert']
+        num_tasks = len(task_titles)
+        valid_task = [True] * len(task_titles)
+        main_task_i = [0, 0, 2, 2]
+        num_aux = [3, 3, 5, 5]
+        task_data_filenames = ['train.pkl'] * num_tasks
+        num_eval_steps_to_use = [30, 100, 20, 40]
+        single_task_nestu = num_eval_steps_to_use
+        eval_intervals = [10000, 10000, 25000, 25000]
+        task_list = ['sawyer_bin_picking',
+                       'hammer-human-v0-dp',
+                       'unstack_stack_env_only_no_move_0',
+                       'insert_no_bring_no_move_0']
+        eval_eps_per_task = [30, 30, 50, 50]
+    elif plot == 'panda_2_and_avgs':
+        task_titles = ['Unstack-Stack',
+                       'Insert',
+                       'Panda Main Tasks (Avg)',
+                       'Sawyer Main Tasks (Avg)']
+        num_tasks = len(task_titles)
+        valid_task = [True] * len(task_titles)
+        main_task_i = [2, 2, 2, 0]
+        num_aux = [5, 5, 5, 3]
+        task_data_filenames = ['train.pkl'] * num_tasks
+        num_eval_steps_to_use = [20, 40, 50, 50]
+        single_task_nestu = num_eval_steps_to_use
+        eval_intervals = [25000, 25000, 10000, 10000]
+        task_list = ['unstack_stack_env_only_no_move_0',
+                     'insert_no_bring_no_move_0',
+                     'Panda Main Tasks',
+                     'Sawyer Main Tasks']
+        eval_eps_per_task = [50, 50, 50, 30]
 
     out_tdn = []
     out_vt = []
