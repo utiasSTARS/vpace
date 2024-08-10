@@ -345,6 +345,9 @@ AVG_ENVS_DICT = OrderedDict({
     },
     'all_4_sep': {
         'eval_cutoff_env_step': 500000,
+    },
+    'panda_sawyer_sep': {
+        'eval_cutoff_env_step': 500000,
     }
 })
 

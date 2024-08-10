@@ -1,11 +1,14 @@
 from argparse import Namespace
-import numpy as np
-import matplotlib.pyplot as plt
+import time
 import pickle
 import os
 import glob
 import math
+
+import numpy as np
+import matplotlib.pyplot as plt
 import argparse
+from scipy.ndimage import convolve1d
 
 from rliable import library as rly
 from rliable import metrics
@@ -33,7 +36,13 @@ parser.add_argument('--constrained_layout', action='store_true')
 parser.add_argument('--bigger_labels', action='store_true')
 parser.add_argument('--custom_algo_list', type=str, default="", choices=['overall', 'overall_and_ace'])
 parser.add_argument('--bottom_legend', action='store_true')
+parser.add_argument('--use_rliable', action='store_true')
+parser.add_argument('--rliable_num_reps', type=int, default=20000)
 args = parser.parse_args()
+
+# since this is the plot we're using
+if args.plot == 'panda_2_and_avgs':
+    args.custom_algo_list = 'overall_and_ace'
 
 fig_name = f"{args.plot}_performance"
 
@@ -131,11 +140,25 @@ all_returns, all_successes = plot_common.get_success_return(
 
 # get between task data if necessary
 if 'panda_3_overall' in args.plot or 'avgs' in args.plot:
+    data_path = os.path.join(fig_path, 'data')
+    data_file = os.path.join(data_path, 'between_task_mean_std.pkl')
+
+    # if args.reload_data:
     between_task_args = Namespace()
-    between_task_args.plot = 'all_4_sep'
+    # between_task_args.plot = 'all_4_sep'
+    between_task_args.plot = 'panda_sawyer_sep'
     between_task_args.real_x_axis = True
     between_task_args.stddev_type = 'by_task'
-    between_task_mean_std = get_between_task_mean_std(between_task_args)
+    between_task_args.use_rliable = args.use_rliable
+    between_task_args.rliable_num_reps = args.rliable_num_reps
+    between_task_args.reload_data = args.reload_data
+    between_task_mean_std = get_between_task_mean_std(
+        between_task_args, fig_name=fig_name, valid_algos_custom=valid_algos)
+
+    #     os.makedirs(data_path, exist_ok=True)
+    #     pickle.dump(between_task_mean_std, open(data_file, 'wb'))
+    # else:
+    #     between_task_mean_std = pickle.load(open(data_file, 'rb'))
 
     # make dummy ones for this to make running easier..ignored later anyways
     for task in between_task_mean_std.keys():
@@ -170,12 +193,55 @@ for task_i, task in enumerate(task_dir_names):
             if algo not in all_successes[task].keys():
                 print(f"No data for algo {algo} and task {task}, skipping")
                 continue
-        for ax, task_algo_data in zip([s_ax, r_ax], [all_successes[task][algo], all_returns[task][algo]]):
+        for ax_str, ax, task_algo_data in zip(['s', 'r'], [s_ax, r_ax], [all_successes[task][algo], all_returns[task][algo]]):
             # try:
             if task in plot_common.AVGS_TASK_LIST:
                 mean = between_task_mean_std[task][algo]['means']
                 std = between_task_mean_std[task][algo]['stds']
+
+                if args.use_rliable:
+                    iqm_scores = between_task_mean_std[task][algo]['iqm_scores']
+                    iqm_cis = between_task_mean_std[task][algo]['iqm_cis'].T
             else:
+                if args.use_rliable and not task in real_data_locations:
+                    data_path = os.path.join(fig_path, 'data', 'rliable')
+                    os.makedirs(data_path, exist_ok=True)
+                    data_file = os.path.join(data_path, f'{ax_str}-{task}-{algo}.pkl')
+                    if args.reload_data:
+                        # shape for multitask raw is seed, eval step, aux task, eval ep
+                        # shape for sample efficiency curve from rliable is (seed x num envs x eval step)
+                        # for single task, num envs will just be 1
+                        if algo in multitask_algos:
+                            per_seed_scores = task_algo_data['raw'].mean(axis=-1)[..., main_task_i[task_i]]
+                        else:
+                            per_seed_scores = task_algo_data['raw'].mean(axis=-1)
+
+                        # for smoothing, convolve the raw data across time dimension instead of how we do it without rliable
+                        if num_timesteps_mean > 1:
+                            convolv_op = np.ones(num_timesteps_mean) / num_timesteps_mean
+                            per_seed_scores_smoothed = convolve1d(per_seed_scores, convolv_op, axis=-1, mode='nearest')
+                            per_seed_scores = per_seed_scores_smoothed
+
+                        # now need a dummy axis for num envs
+                        per_seed_scores = np.expand_dims(per_seed_scores, axis=1)
+                        scores_dict = {'dummy': per_seed_scores}
+                        iqm = lambda scores: np.array([metrics.aggregate_iqm(scores[..., frame])
+                                                    for frame in range(scores.shape[-1])])
+                        print(f"Starting 95%% Bootstrap CIs calc for task {task}, algo {algo}")
+                        ci_calc_start = time.time()
+                        iqm_scores, iqm_cis = rly.get_interval_estimates(scores_dict, iqm, reps=args.rliable_num_reps)
+                        print(f"Finished 95%% Bootstrap CIs calc for task {task}, algo {algo}, took {time.time() - ci_calc_start:.3f}s")
+                        iqm_scores = iqm_scores['dummy']
+                        iqm_cis = iqm_cis['dummy']
+
+                        # save the data for more quickly recreating the figure for format-only fixes
+                        data = {'iqm_scores': iqm_scores, 'iqm_cis': iqm_cis}
+                        pickle.dump(data, open(data_file, 'wb'))
+                    else:
+                        data = pickle.load(open(data_file, 'rb'))
+                        iqm_scores = data['iqm_scores']
+                        iqm_cis = data['iqm_cis']
+
                 if algo in multitask_algos:
                     mean = task_algo_data['mean'][..., main_task_i[task_i]]
                     std = task_algo_data['std'][..., main_task_i[task_i]]
@@ -183,19 +249,13 @@ for task_i, task in enumerate(task_dir_names):
                     mean = task_algo_data['mean']
                     std = task_algo_data['std']
 
-                # hardcode for real robot envs
-                if task in real_data_locations:
-                    num_timesteps_mean_actual = 1
-                else:
-                    num_timesteps_mean_actual = num_timesteps_mean
-
-                if num_timesteps_mean_actual > 1:
+                if num_timesteps_mean > 1 and not task in real_data_locations:
                     # shape for multitask is raw is seed, eval step, aux task, eval ep
                     # for single is seed, eval step, eval ep
                     smooth_means = []
                     smooth_stds = []
                     for eval_step in range(task_algo_data['raw'].shape[1]):
-                        half_ts = num_timesteps_mean_actual // 2
+                        half_ts = num_timesteps_mean // 2
                         bottom_ind = max(0, eval_step - half_ts)
                         top_ind = min(task_algo_data['raw'].shape[1], eval_step + half_ts + 1)
                         if algo in multitask_algos:
@@ -218,21 +278,6 @@ for task_i, task in enumerate(task_dir_names):
                                     eval_intervals[task_i] * subsample_rate))
             x_vals = x_vals / x_val_scale
 
-            # test combining data at subsample rate to see if it reduces noise
-            # if subsample_rate > 1:
-            #     new_mean = []
-            #     new_std = []
-            #     for samp_start in range(0, task_algo_data['raw'].shape[1], subsample_rate):
-            #         new_samp = task_algo_data['raw'][:, samp_start:samp_start+subsample_rate, ...]
-            #         if algo in multitask_algos:
-            #             new_mean.append(new_samp.mean(axis=(1, -1))[:, main_task_i[task_i]].mean())
-            #             new_std.append(new_samp.mean(axis=(1, -1))[:, main_task_i[task_i]].std())
-            #         else:
-            #             new_mean.append(new_samp.mean(axis=(1, -1)).mean())
-            #             new_std.append(new_samp.mean(axis=(1, -1)).std())
-            #     mean = np.array(new_mean)
-            #     std = np.array(new_std)
-
             if args.plot == 'hand':
                 label = algo_titles[algo_i] if task_i == 4 else ""
             else:
@@ -248,12 +293,16 @@ for task_i, task in enumerate(task_dir_names):
                     elif algo == 'multi-sqil-no-vp':
                         label = "ACE"
 
-            ax.plot(x_vals, mean, label=label,
-                    # color=cmap(algo_i), linewidth=linewidth, linestyle=line_style)
-                    color=cmap(cmap_is[algo_i]), linewidth=linewidth, linestyle=line_style)
-            # ax.fill_between(x_vals, mean - num_stds * std, mean + num_stds * std, facecolor=cmap(algo_i),
-            ax.fill_between(x_vals, mean - num_stds * std, mean + num_stds * std, facecolor=cmap(cmap_is[algo_i]),
-                            alpha=std_alpha)
+            if args.use_rliable and not task in real_data_locations:
+                ax.plot(x_vals, iqm_scores, label=label,
+                        color=cmap(cmap_is[algo_i]), linewidth=linewidth, linestyle=line_style)
+                ax.fill_between(x_vals, iqm_cis[0], iqm_cis[1], facecolor=cmap(cmap_is[algo_i]),
+                                alpha=std_alpha)
+            else:
+                ax.plot(x_vals, mean, label=label,
+                        color=cmap(cmap_is[algo_i]), linewidth=linewidth, linestyle=line_style)
+                ax.fill_between(x_vals, mean - num_stds * std, mean + num_stds * std, facecolor=cmap(cmap_is[algo_i]),
+                                alpha=std_alpha)
 
             if task == 'Sawyer Main Tasks':
                 ax.set_ylabel('Return (norm)', fontsize=font_size + 2)
@@ -278,9 +327,6 @@ for task_i, task in enumerate(task_dir_names):
         else:
             ax.set_title(task_titles[task_i], fontsize=font_size)
 
-        # if args.plot == 'hardest_4':
-        #     if task_i == 2:
-        #         ax.set_ylabel('Episode Return', fontsize=font_size + 2)
 
         if plot_type == 's':
             if 'hardest' in args.plot and ('sawyer' in task or 'human' in task):
@@ -326,13 +372,9 @@ for task_i, task in enumerate(task_dir_names):
             Axis.set_major_formatter(ax.yaxis, ticker.FuncFormatter(divide_formatter))
 
 
-
 fig_path += args.extra_name
 
 for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
-
-    # if side_legend:
-    #     fig_name = "sideleg_" + fig_name
 
     if sum(valid_task) == 1:
         label_font_size = font_size - 2
@@ -343,8 +385,6 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
 
     ax = fig.add_subplot(111, frameon=False)
     ax.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-    # ax.set_xlabel("Environment Steps (millions)", fontsize=font_size)
-    # ax.set_xlabel("Environment Steps (hundred thousands)", fontsize=font_size)
     if args.constrained_layout:
         if args.bigger_labels:
             fig.supxlabel(r"Env. Steps ($\times$100k)", fontsize=label_font_size)
@@ -440,13 +480,6 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
                         ncol=int(math.ceil((len(algo_dir_names) + 1))),
                         bbox_to_anchor=(0.5, -0.3))
 
-    # fig.subplots_adjust(hspace=.35)
-    # fig.subplots_adjust(hspace=1.0)
-    # fig.tight_layout()
-    # fig.subplots_adjust(top=.8, bottom=0.0)
-    # plt.subplots_adjust(top=.65)
-    # fig.subplots_adjust(left=0.5)
-
     if args.vertical_plot:
         fig_name = f"vert_{fig_name}"
 
@@ -458,6 +491,9 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
 
     if not side_legend:
         fig_name = f"bottom_legend_{fig_name}"
+
+    if args.use_rliable:
+        fig_name = f"rliable_{fig_name}"
 
     os.makedirs(fig_path, exist_ok=True)
     fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')
