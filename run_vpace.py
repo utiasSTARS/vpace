@@ -108,6 +108,7 @@ parser.add_argument('--move_obj_filename', type=str, choices=['5_move.gz', '5_mo
                     help="Name of move-object expert data file. new is a better match for 5hz env.")
 parser.add_argument('--threshold_discriminator', action="store_true")
 parser.add_argument('--q_regularizer', type=str, choices=['vp', 'cql', 'c2f'], default="vp")
+parser.add_argument('--rnd', action="store_true", help="Enable RND")
 parser.add_argument('--q_over_max_penalty', type=float, default=10.0,
                         help="If set, a multiplier on the q magnitude over the max possible q based on current expert avg/max, "\
                              "using reward_scaling and discount_factor")
