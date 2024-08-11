@@ -28,7 +28,8 @@ parser.add_argument('--reload_data', action='store_true')
 parser.add_argument('--plot', type=str, default='main',
                     choices=['main', 'rce', 'hand', 'abl_expert', 'abl_alg', 'abl_dquant', 'rce_hand_theirs',
                              'abl_all', 'abl_exaug', 'hardest', 'hardest_4', 'real', 'hardest_5', 'panda_3_overall',
-                             'panda_3_hardest_overall', 'best_4_overall', 'panda_2_and_avgs', 'abl_reg', 'abl_rew_model'])
+                             'panda_3_hardest_overall', 'best_4_overall', 'panda_2_and_avgs', 'abl_reg', 'abl_rew_model',
+                             'abl_lambda'])
 parser.add_argument('--extra_name', type=str, default="")
 parser.add_argument('--vertical_plot', action='store_true')
 parser.add_argument('--force_vert_squish', action='store_true')
@@ -382,7 +383,7 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
 
     if sum(valid_task) == 1:
         label_font_size = font_size - 2
-        y_label_pad = 2.0
+        y_label_pad = 10.0
     else:
         label_font_size = font_size + 2
         y_label_pad = 8.0
@@ -430,10 +431,14 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
         pass
     elif args.plot == 'hardest':
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.99, 0.075))
-    elif fig_shape == [1, 2]:
+    elif fig_shape == [1, 2] or fig_shape == [1, 1]:
         num_col = np.ceil(len(valid_algos) / 2)
         if side_legend:
-            raise NotImplementedError("Add this if you need it!")
+            bbta = (1.15, 0.25)
+            if args.plot == 'abl_exaug':
+                bbta = (1.22, 0.2)
+            fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
+                        ncol=1, bbox_to_anchor=bbta)
         else:
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
                         ncol=num_col, bbox_to_anchor=(0.5, -0.53))

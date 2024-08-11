@@ -151,6 +151,14 @@ abl_rew_model = {
     }
 }
 
+abl_lambda = {
+    'unstack_stack_env_only_no_move_0': {
+        'multi-sqil':       "multi-sqil/apr15_envfix",
+        'qomp1':    "multi-sqil/apr15_envfix_qomp1",
+        'qomp100':    "multi-sqil/apr15_envfix_qomp100",
+    }
+}
+
 abl_alg = {
     'unstack_stack_env_only_no_move_0': {
         'multi-sqil':       "multi-sqil/feb26_avgexpqmax",

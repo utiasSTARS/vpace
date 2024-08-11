@@ -36,13 +36,31 @@ RCE_REG_VS_CLASS_DICT = OrderedDict({
     }
 })
 
+MULTITASK_ALGOS = [
+    'multi-sqil',
+    'multi-disc',
+    'multi-sqil-no-vp',
+    'multi-rce',
+    'full_trajs',
+    'full_trajs_wa',
+    'sparse_rew',
+    'qomp1',
+    'qomp100',
+    'no_exp_random',
+    '10_data',
+    '100_data',
+    '10_data_no_exp_random',
+    'cql-ace-sqil',
+    'qreg-ace-sqil'
+]
+
 
 ALGO_TITLE_DICT = OrderedDict({
     'multi-sqil':{
         'title': 'VPACE-SQIL',
         'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest',
                   'hardest_4', 'real', 'hardest_5', 'panda_3_overall', 'panda_3_hardest_overall', 'best_4_overall',
-                  'abl_reg'},
+                  'abl_reg', 'abl_lambda'},
         'cmap_i': 0,
     },
     'multi-disc':{
@@ -132,16 +150,16 @@ ALGO_TITLE_DICT = OrderedDict({
     # },
     'qomp1':{
         'title': r'$\lambda=1$',
-        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda'},
+        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda', 'abl_lambda'},
         'cmap_i': 12,
     },
     'qomp100':{
         'title': r'$\lambda=100$',
-        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda'},
+        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda', 'abl_lambda'},
         'cmap_i': 15,
     },
     'no_exp_random':{
-        'title': 'No Example Augmentation',
+        'title': 'No Ex. Aug.',
         'plots': {'abl_alg', 'abl_exaug'},
         'cmap_i': 14,
     },
@@ -166,7 +184,7 @@ ALGO_TITLE_DICT = OrderedDict({
     #     'cmap_i': 19,
     # }
     '10_data_no_exp_random':{
-        'title': '10 Examples, No Ex. Aug.',
+        'title': '10 Ex., No EA',
         'plots': {'abl_exaug'},
         'cmap_i': 19,
     },
@@ -586,16 +604,29 @@ def get_task_defaults(plot='main'):
         task_list = ["PandaDrawerLineLongEp", "PandaDoorNoJamAngleLongEp"]
         eval_eps_per_task = [10, 10]
     elif 'abl' in plot:
-        valid_task = [True, True]
-        task_titles = ["Unstack-Stack", "Insert"]
-        main_task_i = [2, 2]
-        num_aux = [5, 5]
-        task_data_filenames = ['train.pkl', 'train.pkl']
-        num_eval_steps_to_use = [20, 40]
-        single_task_nestu = [20, 40]
-        eval_intervals = [25000, 25000]
-        task_list = [TASK_LIST[4], TASK_LIST[6]]
-        eval_eps_per_task = [50] * len(task_titles)
+        if plot in ['abl_lambda', 'abl_exaug']:
+            print("No ablation labmda results for insert yet.")
+            valid_task = [True]
+            task_titles = ["Unstack-Stack"]
+            main_task_i = [2]
+            num_aux = [5]
+            task_data_filenames = ['train.pkl']
+            num_eval_steps_to_use = [20]
+            single_task_nestu = [20]
+            eval_intervals = [25000]
+            task_list = [TASK_LIST[4]]
+            eval_eps_per_task = [50] * len(task_titles)
+        else:
+            valid_task = [True, True]
+            task_titles = ["Unstack-Stack", "Insert"]
+            main_task_i = [2, 2]
+            num_aux = [5, 5]
+            task_data_filenames = ['train.pkl', 'train.pkl']
+            num_eval_steps_to_use = [20, 40]
+            single_task_nestu = [20, 40]
+            eval_intervals = [25000, 25000]
+            task_list = [TASK_LIST[4], TASK_LIST[6]]
+            eval_eps_per_task = [50] * len(task_titles)
     elif plot == 'hand':
         valid_task = [HAND_TASK_SETTINGS[task_key]['valid'] for task_key in HAND_TASK_SETTINGS.keys()]
         task_titles = [*HAND_TASK_SETTINGS]
@@ -775,13 +806,15 @@ def get_algo_defaults(plot='main'):
                 algo_titles.append("200 Examples")
             elif 'reg' in plot:
                 algo_titles.append(r"VP: $ y(s, s') \leq y(s^*, s^*)$")
+            elif plot == 'abl_lambda':
+                algo_titles.append(r'$\lambda = 10$')
             else:
                 algo_titles.append("VPACE")
         elif 'abl' in plot and k == 'sqil':
             algo_titles.append("VP-SQIL, no ablations")
         else:
             algo_titles.append(ALGO_TITLE_DICT[k]['title'])
-        if 'multi' in k or 'abl_all' in plot:
+        if 'multi' in k or 'abl_all' in plot or k in MULTITASK_ALGOS:
             if 'st' not in k and k != 'sqil':
                 multitask_algos.append(k)
         if plot in ALGO_TITLE_DICT[k]['plots']:
