@@ -93,6 +93,61 @@ abl_expert = {
         'full_trajs':       "multi-sqil/apr15_envfix_full_trajs",
         'full_trajs_wa':       "multi-sqil/apr15_envfix_full_trajs_with_actions",
         'sparse_rew':       "multi-spar/apr15_envfix_sparse_rew",
+    },
+    'insert_no_bring_no_move_0': {
+        'multi-sqil':       "multi-sqil/feb26_avgexpqmax",
+        'full_trajs':       "multi-sqil/aug5_full_trajs",
+        'full_trajs_wa':       "multi-sqil/aug5_full_trajs_with_act",
+        'sparse_rew':       "multi-spar/aug5_sparse_rew",
+    }
+}
+
+abl_dquat_labmda = {
+    'unstack_stack_env_only_no_move_0': {
+        'multi-sqil':       "multi-sqil/apr15_envfix",
+        '20_data':          "multi-sqil/apr15_envfix_10data",
+        '100_data':         "multi-sqil/apr15_envfix_100data",
+        'qomp1':    "multi-sqil/apr15_envfix_qomp1",
+        'qomp100':    "multi-sqil/apr15_envfix_qomp100",
+    },
+    'insert_no_bring_no_move_0': {
+        'multi-sqil':       "multi-sqil/feb26_avgexpqmax",
+        '20_data':          "multi-sqil/mar4_20data",  # TODO these aren't currently correct, and qomp1/qomp100 are missing
+        '100_data':         "multi-sqil/mar4_100data",
+        'qomp1':    "multi-sqil/apr15_envfix_qomp1",
+        'qomp100':    "multi-sqil/apr15_envfix_qomp100",
+    }
+}
+
+abl_reg = {
+    'unstack_stack_env_only_no_move_0': {
+        'multi-sqil':       "multi-sqil/apr15_envfix",
+        'cql-ace-sqil':          "multi-sqil/cql",
+        'qreg-ace-sqil':         "multi-sqil/c2f",
+    },
+    'insert_no_bring_no_move_0': {
+        'multi-sqil':       "multi-sqil/feb26_avgexpqmax",
+        'cql-ace-sqil':          "multi-sqil/cql",
+        'qreg-ace-sqil':         "multi-sqil/c2f",
+    }
+}
+
+abl_rew_model = {
+    'unstack_stack_env_only_no_move_0': {
+        'sqil':       "sqil/apr15_envfix",
+        'sqil-no-vp':       "sqil/apr15_envfix_noqovermax",
+        'disc':              "disc/apr15_envfix",
+        'rce':               "rce/apr15_envfix",
+        'ember':               "disc/ember",
+        'rce-cql':               "rce/rce-cql",
+    },
+    'insert_no_bring_no_move_0': {
+        'sqil':       "sqil/feb26_avgexpqmax",
+        'sqil-no-vp':       "sqil/apr4_noqovermax",
+        'disc':              "disc/feb26_avgexpqmax",
+        'rce':               "rce/feb26_avgexpqmax",
+        'ember':         "disc/ember",
+        'rce-cql':         "rce/rce-cql",
     }
 }
 
@@ -108,10 +163,14 @@ abl_alg = {
 
 abl_dquant = {
     'unstack_stack_env_only_no_move_0': {
+        'multi-sqil':       "multi-sqil/apr15_envfix",
+        '10_data':          "multi-sqil/apr15_envfix_10data",
+        '100_data':         "multi-sqil/apr15_envfix_100data",
+    },
+    'insert_no_bring_no_move_0': {
         'multi-sqil':       "multi-sqil/feb26_avgexpqmax",
-        '20_data':          "multi-sqil/mar4_20data",
-        '100_data':         "multi-sqil/mar4_100data",
-        '20_data_no_exp_random':         "multi-sqil/mar15_noerf_20data",
+        '10_data':          "multi-sqil/aug5_10data",
+        '100_data':         "multi-sqil/aug7_100data",
     }
 }
 

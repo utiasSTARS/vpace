@@ -28,7 +28,7 @@ parser.add_argument('--reload_data', action='store_true')
 parser.add_argument('--plot', type=str, default='main',
                     choices=['main', 'rce', 'hand', 'abl_expert', 'abl_alg', 'abl_dquant', 'rce_hand_theirs',
                              'abl_all', 'abl_exaug', 'hardest', 'hardest_4', 'real', 'hardest_5', 'panda_3_overall',
-                             'panda_3_hardest_overall', 'best_4_overall', 'panda_2_and_avgs'])
+                             'panda_3_hardest_overall', 'best_4_overall', 'panda_2_and_avgs', 'abl_reg', 'abl_rew_model'])
 parser.add_argument('--extra_name', type=str, default="")
 parser.add_argument('--vertical_plot', action='store_true')
 parser.add_argument('--force_vert_squish', action='store_true')
@@ -227,7 +227,7 @@ for task_i, task in enumerate(task_dir_names):
                         scores_dict = {'dummy': per_seed_scores}
                         iqm = lambda scores: np.array([metrics.aggregate_iqm(scores[..., frame])
                                                     for frame in range(scores.shape[-1])])
-                        print(f"Starting 95%% Bootstrap CIs calc for task {task}, algo {algo}")
+                        print(f"Starting 95% Bootstrap CIs calc for {ax_str} plot, task {task}, algo {algo}")
                         ci_calc_start = time.time()
                         iqm_scores, iqm_cis = rly.get_interval_estimates(scores_dict, iqm, reps=args.rliable_num_reps)
                         print(f"Finished 95%% Bootstrap CIs calc for task {task}, algo {algo}, took {time.time() - ci_calc_start:.3f}s")
@@ -292,6 +292,10 @@ for task_i, task in enumerate(task_dir_names):
                         label = "VPACE"
                     elif algo == 'multi-sqil-no-vp':
                         label = "ACE"
+            elif 'abl_rew_model' in args.plot:
+                if task_i == 0:
+                    if algo == 'disc':
+                        label = "DAC"
 
             if args.use_rliable and not task in real_data_locations:
                 ax.plot(x_vals, iqm_scores, label=label,
@@ -317,12 +321,12 @@ for task_i, task in enumerate(task_dir_names):
 
         # pretty
         ax.grid(alpha=0.5)
-        if args.plot == 'abl_expert':
-            ax.set_title("Reward Variations", fontsize=font_size)
-        elif args.plot == 'abl_alg':
+        # if args.plot == 'abl_expert':
+        #     ax.set_title("Reward Variations", fontsize=font_size)
+        if args.plot == 'abl_alg':
             ax.set_title("Algorithm Variations", fontsize=font_size)
-        elif args.plot == 'abl_dquant':
-            ax.set_title("Expert Quantity Variations", fontsize=font_size)
+        # elif args.plot == 'abl_dquant':
+        #     ax.set_title("Expert Quantity Variations", fontsize=font_size)
 
         else:
             ax.set_title(task_titles[task_i], fontsize=font_size)
@@ -426,6 +430,13 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
         pass
     elif args.plot == 'hardest':
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.99, 0.075))
+    elif fig_shape == [1, 2]:
+        num_col = np.ceil(len(valid_algos) / 2)
+        if side_legend:
+            raise NotImplementedError("Add this if you need it!")
+        else:
+            fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
+                        ncol=num_col, bbox_to_anchor=(0.5, -0.53))
     elif fig_shape == [2, 4] and sum(valid_task) == 8:
         # legend underneath
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.11))
@@ -473,11 +484,11 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
         else:
             if args.constrained_layout:
                 fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
-                        ncol=int(math.ceil((len(algo_dir_names) + 1))),
+                        ncol=int(math.ceil((len(valid_algos) + 1))),
                         bbox_to_anchor=(0.5, -0.21))
             else:
                 fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
-                        ncol=int(math.ceil((len(algo_dir_names) + 1))),
+                        ncol=int(math.ceil(len(valid_algos))),
                         bbox_to_anchor=(0.5, -0.3))
 
     if args.vertical_plot:

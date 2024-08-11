@@ -41,7 +41,8 @@ ALGO_TITLE_DICT = OrderedDict({
     'multi-sqil':{
         'title': 'VPACE-SQIL',
         'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest',
-                  'hardest_4', 'real', 'hardest_5', 'panda_3_overall', 'panda_3_hardest_overall', 'best_4_overall'},
+                  'hardest_4', 'real', 'hardest_5', 'panda_3_overall', 'panda_3_hardest_overall', 'best_4_overall',
+                  'abl_reg'},
         'cmap_i': 0,
     },
     'multi-disc':{
@@ -66,23 +67,23 @@ ALGO_TITLE_DICT = OrderedDict({
         # 'plots': {'main', 'rce'},
         'cmap_i': 1,
     },
-    'disc':{
-        'title': 'VP-DAC',
-        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'panda_3_overall', 'panda_3_hardest_overall'
-                  , 'best_4_overall'},
-        'cmap_i': 3,
-    },
     'sqil-no-vp':{
         'title': 'SQIL',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_hand_theirs', 'real', 'hardest_5', 'panda_3_overall',
-                  'panda_3_hardest_overall', 'best_4_overall'},
+                  'panda_3_hardest_overall', 'best_4_overall', 'abl_rew_model'},
         # 'plots': {'main', 'rce'},
         'cmap_i': 7,
+    },
+    'disc':{
+        'title': 'VP-DAC',
+        'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'panda_3_overall', 'panda_3_hardest_overall'
+                  , 'best_4_overall', 'abl_rew_model'},
+        'cmap_i': 3,
     },
     'rce':{
         'title': 'RCE',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'rce_env_mods', 'panda_3_overall', 'panda_3_hardest_overall',
-                   'best_4_overall'},
+                   'best_4_overall', 'abl_rew_model'},
         # 'plots': {'main', 'rce'},
         'cmap_i': 5,
     },
@@ -102,22 +103,25 @@ ALGO_TITLE_DICT = OrderedDict({
         'cmap_i': 13,
     },
     'full_trajs':{
-        'title': '+Full Trajectories',
+        'title': '+Full Trajs',
+        # 'title': 'LfGP (obs only)',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 8,
     },
     'full_trajs_wa':{
-        'title': '+Full Trajectories \\& Actions',
+        'title': '+Full Trajs \\& Acts',
+        # 'title': 'LfGP (obs + act)',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 17,
     },
     'full_trajs_st':{
         'title': 'VP-SQIL +Full Trajectories',
-        'plots': {'abl_expert', 'abl_all'},
+        'plots': {'abl_all'},
         'cmap_i': 14,
     },
     'sparse_rew':{
-        'title': 'SAC-X (Sparse Rewards)',
+        # 'title': 'SAC-X (Sparse Rewards)',
+        'title': 'SAC-X',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 10,
     },
@@ -128,12 +132,12 @@ ALGO_TITLE_DICT = OrderedDict({
     # },
     'qomp1':{
         'title': r'$\lambda=1$',
-        'plots': {'abl_alg', 'abl_all'},
+        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda'},
         'cmap_i': 12,
     },
     'qomp100':{
         'title': r'$\lambda=100$',
-        'plots': {'abl_alg', 'abl_all'},
+        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda'},
         'cmap_i': 15,
     },
     'no_exp_random':{
@@ -148,12 +152,12 @@ ALGO_TITLE_DICT = OrderedDict({
     # },
     '10_data':{
         'title': '10 Examples',
-        'plots': {'abl_dquant', 'abl_all', 'abl_exaug'},
+        'plots': {'abl_dquant', 'abl_all', 'abl_exaug', 'abl_dquat_labmda'},
         'cmap_i': 16,
     },
     '100_data':{
         'title': '100 Examples',
-        'plots': {'abl_dquant', 'abl_all'},
+        'plots': {'abl_dquant', 'abl_all', 'abl_dquat_labmda'},
         'cmap_i': 18,
     },
     # '20_data_no_exp_random':{
@@ -163,7 +167,27 @@ ALGO_TITLE_DICT = OrderedDict({
     # }
     '10_data_no_exp_random':{
         'title': '10 Examples, No Ex. Aug.',
-        'plots': {'abl_dquant', 'abl_exaug'},
+        'plots': {'abl_exaug'},
+        'cmap_i': 19,
+    },
+    'cql-ace-sqil':{
+        'title': 'CQL',
+        'plots': {'abl_reg'},
+        'cmap_i': 14,
+    },
+    'qreg-ace-sqil':{
+        'title': r'C2F: $||Q(s,a)||_2^2$',
+        'plots': {'abl_reg'},
+        'cmap_i': 19,
+    },
+    'ember':{
+        'title': 'EMBER',
+        'plots': {'abl_rew_model'},
+        'cmap_i': 14,
+    },
+    'rce-cql':{
+        'title': 'RCE-CQL',
+        'plots': {'abl_rew_model'},
         'cmap_i': 19,
     }
 })
@@ -562,15 +586,15 @@ def get_task_defaults(plot='main'):
         task_list = ["PandaDrawerLineLongEp", "PandaDoorNoJamAngleLongEp"]
         eval_eps_per_task = [10, 10]
     elif 'abl' in plot:
-        valid_task = [True]
-        task_titles = ["Unstack-Stack"]
-        main_task_i = [2]
-        num_aux = [5]
-        task_data_filenames = ['train.pkl']
-        num_eval_steps_to_use = [20]
-        single_task_nestu = [20]
-        eval_intervals = [25000]
-        task_list = [TASK_LIST[4]]
+        valid_task = [True, True]
+        task_titles = ["Unstack-Stack", "Insert"]
+        main_task_i = [2, 2]
+        num_aux = [5, 5]
+        task_data_filenames = ['train.pkl', 'train.pkl']
+        num_eval_steps_to_use = [20, 40]
+        single_task_nestu = [20, 40]
+        eval_intervals = [25000, 25000]
+        task_list = [TASK_LIST[4], TASK_LIST[6]]
         eval_eps_per_task = [50] * len(task_titles)
     elif plot == 'hand':
         valid_task = [HAND_TASK_SETTINGS[task_key]['valid'] for task_key in HAND_TASK_SETTINGS.keys()]
@@ -746,12 +770,18 @@ def get_algo_defaults(plot='main'):
         # if plot in ALGO_TITLE_DICT[k]['plots']:
         algo_dir_names.append(k)
         if 'abl' in plot and k == 'multi-sqil':
-            algo_titles.append("VPACE-SQIL, no ablations")
+            # algo_titles.append("VPACE-SQIL, no ablations")
+            if 'dquant' in plot:
+                algo_titles.append("200 Examples")
+            elif 'reg' in plot:
+                algo_titles.append(r"VP: $ y(s, s') \leq y(s^*, s^*)$")
+            else:
+                algo_titles.append("VPACE")
         elif 'abl' in plot and k == 'sqil':
             algo_titles.append("VP-SQIL, no ablations")
         else:
             algo_titles.append(ALGO_TITLE_DICT[k]['title'])
-        if 'multi' in k or 'abl' in plot:
+        if 'multi' in k or 'abl_all' in plot:
             if 'st' not in k and k != 'sqil':
                 multitask_algos.append(k)
         if plot in ALGO_TITLE_DICT[k]['plots']:
