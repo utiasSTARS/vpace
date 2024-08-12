@@ -29,21 +29,23 @@ parser.add_argument('--plot', type=str, default='main',
                     choices=['main', 'rce', 'hand', 'abl_expert', 'abl_alg', 'abl_dquant', 'rce_hand_theirs',
                              'abl_all', 'abl_exaug', 'hardest', 'hardest_4', 'real', 'hardest_5', 'panda_3_overall',
                              'panda_3_hardest_overall', 'best_4_overall', 'panda_2_and_avgs', 'abl_reg', 'abl_rew_model',
-                             'abl_lambda'])
+                             'abl_lambda', 'panda_2_and_all_avgs'])
 parser.add_argument('--extra_name', type=str, default="")
 parser.add_argument('--vertical_plot', action='store_true')
 parser.add_argument('--force_vert_squish', action='store_true')
 parser.add_argument('--constrained_layout', action='store_true')
 parser.add_argument('--bigger_labels', action='store_true')
-parser.add_argument('--custom_algo_list', type=str, default="", choices=['overall', 'overall_and_ace'])
+parser.add_argument('--custom_algo_list', type=str, default="",
+                    choices=['overall', 'overall_and_ace', 'overall_and_ace_and_rnd'])
 parser.add_argument('--bottom_legend', action='store_true')
 parser.add_argument('--use_rliable', action='store_true')
 parser.add_argument('--rliable_num_reps', type=int, default=20000)
 args = parser.parse_args()
 
 # since this is the plot we're using
-if args.plot == 'panda_2_and_avgs':
-    args.custom_algo_list = 'overall_and_ace'
+if args.plot in ['panda_2_and_avgs', 'panda_3_overall', 'panda_2_and_all_avgs']:
+    args.custom_algo_list = 'overall_and_ace_and_rnd'
+    # args.custom_algo_list = 'overall_and_ace'
 
 fig_name = f"{args.plot}_performance"
 
@@ -96,6 +98,10 @@ if args.force_vert_squish:
         plot_size[0] = 4.2
     font_size += 2
 
+if args.plot == 'panda_2_and_all_avgs':
+    fig_shape = [1, 5]
+    plot_size[0] -= .7
+
 if args.bigger_labels:
     font_size += 2
     linewidth *= 2
@@ -141,13 +147,20 @@ all_returns, all_successes = plot_common.get_success_return(
 
 # get between task data if necessary
 if 'panda_3_overall' in args.plot or 'avgs' in args.plot:
-    data_path = os.path.join(fig_path, 'data')
-    data_file = os.path.join(data_path, 'between_task_mean_std.pkl')
+    # data_path = os.path.join(fig_path, 'data')
+    # data_file = os.path.join(data_path, 'between_task_mean_std.pkl')
 
     # if args.reload_data:
     between_task_args = Namespace()
     # between_task_args.plot = 'all_4_sep'
-    between_task_args.plot = 'panda_sawyer_sep'
+    if args.plot == 'panda_2_and_avgs':
+        between_task_args.plot = 'panda_sawyer_sep'
+    elif args.plot == 'panda_2_and_all_avgs':
+        between_task_args.plot = 'all_3_sep'
+    elif args.plot == 'panda_3_overall':
+        between_task_args.plot = 'main'
+    else:
+        raise NotImplementedError(f"avgs not implemented for plot arg {args.plot}")
     between_task_args.real_x_axis = True
     between_task_args.stddev_type = 'by_task'
     between_task_args.use_rliable = args.use_rliable
@@ -194,6 +207,7 @@ for task_i, task in enumerate(task_dir_names):
             if algo not in all_successes[task].keys():
                 print(f"No data for algo {algo} and task {task}, skipping")
                 continue
+
         for ax_str, ax, task_algo_data in zip(['s', 'r'], [s_ax, r_ax], [all_successes[task][algo], all_returns[task][algo]]):
             # try:
             if task in plot_common.AVGS_TASK_LIST:
@@ -270,10 +284,18 @@ for task_i, task in enumerate(task_dir_names):
 
             if algo in multitask_algos:
                 line_style = '-'
+                # if 'no-vp' in algo:
+                #     line_style = '--'
+                # else:
+                #     line_style = '-'
             # elif 'theirs' in plot_common.ALGO_TITLE_DICT[algo]['title']:
             #     line_style = '-.'
             else:
                 line_style = '--'
+                # if 'no-vp' in algo:
+                #     line_style = ':'
+                # else:
+                #     line_style = '-.'
 
             x_vals = np.array(range(eval_intervals[task_i], eval_intervals[task_i] * len(mean) + 1,
                                     eval_intervals[task_i] * subsample_rate))

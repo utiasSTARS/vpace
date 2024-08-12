@@ -13,6 +13,9 @@ main = {
         'rce':               "rce/feb24_newqmax_fixed",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        # 'disc-no-vp':        "disc/dac",
+        'disc-no-vp':        "disc/feb24_newqmax_fixed",
     },
     'lift_0': {
         'multi-sqil':        "multi-sqil/feb24_newqmax_fixed",
@@ -23,6 +26,9 @@ main = {
         'rce':               "rce/feb24_newqmax_fixed",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        # 'disc-no-vp':        "disc/dac",
+        'disc-no-vp':        "disc/feb24_newqmax_fixed",
     },
     'move_obj_0': {
         'multi-sqil':        "multi-sqil/feb24_newqmax_fixed",
@@ -33,16 +39,11 @@ main = {
         'rce':               "rce/feb24_newqmax_fixed",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        # 'disc-no-vp':        "disc/dac",
+        'disc-no-vp':        "disc/feb24_newqmax_fixed",
     },
     'unstack_stack_env_only_no_move_0': {
-        # 'multi-sqil':        "multi-sqil/feb26_avgexpqmax",
-        # 'multi-disc':        "multi-disc/feb26_avgexpqmax",
-        # 'multi-rce':         "multi-rce/feb26_avgexpqmax",
-        # 'sqil':              "sqil/feb26_avgexpqmax",
-        # 'disc':              "disc/feb26_avgexpqmax",
-        # 'rce':               "rce/feb26_avgexpqmax",
-        # 'multi-sqil-no-vp':          "multi-sqil/mar4_noqovermax",
-        # 'sqil-no-vp':        "sqil/apr4_noqovermax",
         'multi-sqil':        "multi-sqil/apr15_envfix",
         'multi-disc':        "multi-disc/apr15_envfix",
         'multi-rce':         "multi-rce/apr15_envfix",
@@ -51,6 +52,8 @@ main = {
         'rce':               "rce/apr15_envfix",
         'multi-sqil-no-vp':          "multi-sqil/apr15_envfix_noqovermax",
         'sqil-no-vp':        "sqil/apr15_envfix_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        'disc-no-vp':        "disc/dac",
     },
     'stack_no_move_0': {
         'multi-sqil':        "multi-sqil/feb26_avgexpqmax",
@@ -61,6 +64,8 @@ main = {
         'rce':               "rce/feb26_avgexpqmax",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        'disc-no-vp':        "disc/dac",
     },
     'bring_no_move_0': {
         'multi-sqil':        "multi-sqil/feb26_avgexpqmax",
@@ -71,6 +76,8 @@ main = {
         'rce':               "rce/feb26_avgexpqmax",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        'disc-no-vp':        "disc/dac",
     },
     'insert_no_bring_no_move_0': {
         'multi-sqil':        "multi-sqil/feb26_avgexpqmax",
@@ -81,14 +88,13 @@ main = {
         'rce':               "rce/feb26_avgexpqmax",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'sqil-rnd':          "sqil/sqil_rnd",
+        'disc-no-vp':        "disc/dac",
     },
 }
 
 abl_expert = {
     'unstack_stack_env_only_no_move_0': {
-        # 'multi-sqil':       "multi-sqil/feb26_avgexpqmax",
-        # 'full_trajs':       "multi-sqil/mar4_full_trajs",
-        # 'sparse_rew':       "multi-spar/mar4_sparse_rew",
         'multi-sqil':       "multi-sqil/apr15_envfix",
         'full_trajs':       "multi-sqil/apr15_envfix_full_trajs",
         'full_trajs_wa':       "multi-sqil/apr15_envfix_full_trajs_with_actions",

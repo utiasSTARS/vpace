@@ -41,8 +41,16 @@ def get_between_task_mean_std(args: Namespace, fig_name, valid_algos_custom=None
             valid_task_settingss.append(plot_common.AVG_ENVS_DICT[ptype]['valid_task_settings'])
             plot_titles.append(plot_common.AVG_ENVS_DICT[ptype]['title'])
             num_timesteps_means.append(plot_common.AVG_ENVS_DICT[ptype]['num_timesteps_mean'])
+    elif args.plot == 'all_3_sep':
+        all_valid_task_settings = plot_common.AVG_ENVS_DICT['all']['valid_task_settings']
+        valid_algoss = []; valid_task_settingss = []; plot_titles = []; num_timesteps_means = []
+        for ptype in ['main', 'rce', 'hand']:
+            valid_algoss.append(plot_common.AVG_ENVS_DICT[ptype]['valid_algos'])
+            valid_task_settingss.append(plot_common.AVG_ENVS_DICT[ptype]['valid_task_settings'])
+            plot_titles.append(plot_common.AVG_ENVS_DICT[ptype]['title'])
+            num_timesteps_means.append(plot_common.AVG_ENVS_DICT[ptype]['num_timesteps_mean'])
             if 'relocate-human-v0' in valid_task_settingss[-1]:
-                del valid_task_settingss['relocate-human-v0']  # since all zeros for everything, and missing some results
+                del valid_task_settingss[-1]['relocate-human-v0']  # since all zeros for everything, and missing some results
     elif args.plot == 'all_4_sep':
         all_valid_task_settings = plot_common.AVG_ENVS_DICT['all']['valid_task_settings']
         valid_algoss = []; valid_task_settingss = []; plot_titles = []; num_timesteps_means = []
@@ -52,7 +60,7 @@ def get_between_task_mean_std(args: Namespace, fig_name, valid_algos_custom=None
             plot_titles.append(plot_common.AVG_ENVS_DICT[ptype]['title'])
             num_timesteps_means.append(plot_common.AVG_ENVS_DICT[ptype]['num_timesteps_mean'])
             if 'relocate-human-v0' in valid_task_settingss[-1]:
-                del valid_task_settingss['relocate-human-v0']  # since all zeros for everything, and missing some results
+                del valid_task_settingss[-1]['relocate-human-v0']  # since all zeros for everything, and missing some results
     else:
         all_valid_task_settings = plot_common.AVG_ENVS_DICT[args.plot]['valid_task_settings']
         valid_algoss = [plot_common.AVG_ENVS_DICT[args.plot]['valid_algos']]
@@ -79,6 +87,8 @@ def get_between_task_mean_std(args: Namespace, fig_name, valid_algos_custom=None
 
     if args.plot in ['all_4_sep']:
         num_plots = 4
+    elif args.plot in ['all_3_sep']:
+        num_plots = 3
     elif args.plot in ['panda_sawyer_sep']:
         num_plots = 2
     else:
@@ -242,11 +252,8 @@ def get_between_task_mean_std(args: Namespace, fig_name, valid_algos_custom=None
                                 all_rets_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_rets_norm[task][algo]['std'])
 
                             else:
-                                try:
-                                    all_sucs_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['mean'])
-                                    all_sucs_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['std'])
-                                except:
-                                    import ipdb; ipdb.set_trace()
+                                all_sucs_norm_interp[task][algo]['mean'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['mean'])
+                                all_sucs_norm_interp[task][algo]['std'] = np.interp(new_x, orig_x_new_max, all_successes[task][algo]['std'])
 
                         else:
                             if task not in panda_task_settings and task not in real_task_settings:
@@ -312,7 +319,12 @@ def get_between_task_mean_std(args: Namespace, fig_name, valid_algos_custom=None
 
                     # overwrite max steps if we want to stop it sooner
                     if 'eval_cutoff_env_step' in plot_common.AVG_ENVS_DICT[args.plot]:
-                        eval_cutoff_env_step = plot_common.AVG_ENVS_DICT[args.plot]['eval_cutoff_env_step']
+                        if 'human' in task and 'hand_eval_cutoff_env_step' in plot_common.AVG_ENVS_DICT[args.plot]:
+                            eval_cutoff_env_step = plot_common.AVG_ENVS_DICT[args.plot]['hand_eval_cutoff_env_step']
+                        elif '_0' in task and 'panda_eval_cutoff_env_step' in plot_common.AVG_ENVS_DICT[args.plot]:
+                            eval_cutoff_env_step = plot_common.AVG_ENVS_DICT[args.plot]['panda_eval_cutoff_env_step']
+                        else:
+                            eval_cutoff_env_step = plot_common.AVG_ENVS_DICT[args.plot]['eval_cutoff_env_step']
                         max_eval = eval_cutoff_env_step
                         max_new_eval_steps = int(eval_cutoff_env_step / min_eval_interval)
                         mean = mean[:max_new_eval_steps]
