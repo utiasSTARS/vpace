@@ -33,7 +33,7 @@ parser.add_argument('--algo_lists', type=str, default='sqil,sqil-no-vp,,multi-sq
 parser.add_argument('--model_train_prop', type=float, default=1.0)
 parser.add_argument('--device', type=str, default='cuda:0')
 # parser.add_argument('--top_dir', type=str, default=os.path.join(os.environ['VPACE_TOP_DIR'], 'results'))
-parser.add_argument('--top_dir', type=str, default="/media/ssd_2tb/data/lfebp/results")
+parser.add_argument('--top_dir', type=str, default="/media/ssd_2tb/data/lfebp")
 parser.add_argument('--top_save_dir', type=str, default=os.path.join(os.environ['VPACE_TOP_DIR'],
                                                                      'figures', 'q_traj_values'))
 parser.add_argument('--cam_str', type=str, default='panda_play_higher_closer')
@@ -103,8 +103,10 @@ for task_i, task in enumerate(tasks):
             #     main_task_i = plot_common.PANDA_TASK_SETTINGS[task]['main_task_i']
             #     data_loc_dict = data_locations.main
 
+            multitask_algo = 'multi' in algo or 'ace' in algo
+
             # load model settings
-            config_file = 'lfgp_experiment_setting.pkl' if 'multi' in algo else 'dac_experiment_setting.pkl'
+            config_file = 'lfgp_experiment_setting.pkl' if multitask_algo else 'dac_experiment_setting.pkl'
 
             # choose model based on model_train_prop  TODO not implemented yet, just manually trying earlier models first
             # model_str = '500000.pt'
@@ -116,7 +118,7 @@ for task_i, task in enumerate(tasks):
             for seed in seeds:
                 # load model + env if not yet loaded
                 data_path = fig_common.full_path_from_alg_expname(
-                    args.top_dir, task, seed, data_loc_dict[task][algo])
+                    os.path.join(args.top_dir, 'results'), task, seed, data_loc_dict[task][algo])
 
                 config, env, buffer_preprocess, agent = fig_common.load_model_and_env_once(
                     args.env_seed, os.path.join(data_path, config_file), os.path.join(data_path, model_str),
@@ -126,7 +128,7 @@ for task_i, task in enumerate(tasks):
                 # auxiliary_reward, auxiliary_success = fig_common.get_aux_reward_success(config, env)
                 print(f"loaded agent for task {task}, algo {algo}, seed {seed}")
 
-                if 'multi' in algo:
+                if multitask_algo:
                     # for weighted random scheduler, this sets deterministic action to run what we want
                     agent.high_level_model._intention_i = np.array(main_task_i)
 
@@ -176,12 +178,12 @@ for task_i, task in enumerate(tasks):
                     # print(f"suc? {suc}, avg q: {ep_values[-10:].mean()}")
                     if False:  # for quick removal of this, in case we don't like it
                         if want_suc:
-                            if 'multi' in algo:
+                            if multitask_algo:
                                 got_suc_or_fail = suc[main_task_i]
                             else:
                                 got_suc_or_fail = suc[0]
                         else:
-                            if 'multi' in algo:
+                            if multitask_algo:
                                 got_suc_or_fail = not suc[main_task_i]
                             else:
                                 got_suc_or_fail = not suc[0]
@@ -190,14 +192,14 @@ for task_i, task in enumerate(tasks):
                     else:
                         got_suc_or_fail = True
 
-                if 'multi' in algo:
+                if multitask_algo:
                     ep_values = ep_values[:, main_task_i]
                 all_seed_values.append(ep_values.detach().cpu().numpy().flatten())
 
                 # also need q values for expert data, average
                 if expert_buffer is None:
                     # load the data once
-                    if 'multi' in algo:
+                    if multitask_algo:
                         expert_data_in_path_ind = config[c.EXPERT_BUFFERS][main_task_i].index('expert_data')
                         saved_expert_buffer_path = config[c.EXPERT_BUFFERS][main_task_i]
                         amount = config[c.EXPERT_AMOUNTS][main_task_i]
@@ -216,12 +218,12 @@ for task_i, task in enumerate(tasks):
                                                 match_load_size=True, frame_stack_load=frame_stack)
 
                 expert_buf_pol_actions, _ = agent.model.act_lprob(expert_buffer.observations, expert_buffer.hidden_states)
-                if 'multi' in algo:
+                if multitask_algo:
                     expert_buf_pol_actions = expert_buf_pol_actions[:, main_task_i]
 
                 expert_q_vals, _, _, _ = agent.model.q_vals(expert_buffer.observations, h_state,
                                                             expert_buf_pol_actions.detach())
-                if 'multi' in algo:
+                if multitask_algo:
                     expert_q_vals = expert_q_vals[:, main_task_i]
                 all_seed_expert_values.append(expert_q_vals.detach().cpu().numpy().flatten())
 
@@ -252,7 +254,7 @@ for task_i, task in enumerate(tasks):
             # ax.set_ylabel('Q Value', fontsize=font_size - 2)
             ax.grid(alpha=0.5, which='both')
 
-            # if 'multi' in algo:
+            # if multitask_algo:
             #     line_style = '-'
             # else:
             #     line_style = '--'
@@ -358,6 +360,7 @@ if len(tasks) == 1:
         bbta_dict = {
             1: (0.475, -.35),
             2: (0.475, -.45),
+            3: (0.475, -.55),
             4: (0.475, -.65),
             5: (0.475, -.75),
             6: (0.475, -.85),

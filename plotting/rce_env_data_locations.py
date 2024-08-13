@@ -19,6 +19,9 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'disc-no-vp':        "disc/aug8_dac",
+        # 'disc-no-vp':        "disc/mar31",
+        'sqil-rnd':          "sqil/sqil_rnd",
     },
     'sawyer_drawer_close': {
         'multi-sqil':        "multi-sqil/mar10",
@@ -33,6 +36,9 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'disc-no-vp':        "disc/aug8_dac",
+        # 'disc-no-vp':        "disc/mar31",
+        'sqil-rnd':          "sqil/sqil_rnd",
     },
     'sawyer_push': {
         # 'multi-sqil':        "multi-sqil/mar3",
@@ -49,6 +55,9 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'disc-no-vp':        "disc/aug8_dac",
+        # 'disc-no-vp':        "disc/mar31",
+        'sqil-rnd':          "sqil/sqil_rnd",
     },
     'sawyer_lift': {
         # 'multi-sqil':        "multi-sqil/mar3",
@@ -67,6 +76,9 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'disc-no-vp':        "disc/aug8_dac",
+        # 'disc-no-vp':        "disc/mar31",
+        'sqil-rnd':          "sqil/sqil_rnd",
     },
     'sawyer_box_close': {
         'multi-sqil':        "multi-sqil/mar5_graspfixeddefaults",
@@ -81,6 +93,8 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
+        'disc-no-vp':              "disc/aug8",
+        'sqil-rnd':          "sqil/sqil_rnd",
     },
     'sawyer_bin_picking': {
         # 'multi-sqil':        "multi-sqil/mar5_graspfixeddefaults",
@@ -104,5 +118,7 @@ main_performance = {
         'rce':              "rce/apr29_datafix",
         'sqil-no-vp':       "sqil/apr29_datafix_noqovermax",
         'multi-sqil':       "multi-sqil/apr29_datafix",
+        'disc-no-vp':              "disc/aug8",
+        'sqil-rnd':          "sqil/sqil_rnd",
     },
 }

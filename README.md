@@ -7,15 +7,17 @@
 
 This repository contains data, code, and instructions for reproducing the results from **v**alue-**p**enalized **a**uxiliary **c**ontrol from **e**xamples (VPACE).
 
-- [Installation (Algorithm + Simulated Panda Environments)](#installation-algorithm--simulated-panda-environments)
-  - [Sawyer and Adroit Hand Baselines](#sawyer-and-adroit-hand-baselines)
-  - [Real World Experiments](#real-world-experiments)
-- [Running](#running)
-  - [Quick Start](#quick-start)
-  - [Task Options](#task-options)
-  - [Algorithm Options](#algorithm-options)
-  - [Ablation Study Options](#ablation-study-options)
-- [Figures](#figures)
+- [Value-Penalized Auxiliary Control from Examples for Learning without Rewards or Demonstrations](#value-penalized-auxiliary-control-from-examples-for-learning-without-rewards-or-demonstrations)
+  - [Installation (Algorithm + Simulated Panda Environments)](#installation-algorithm--simulated-panda-environments)
+    - [Sawyer and Adroit Hand Baselines](#sawyer-and-adroit-hand-baselines)
+    - [Real World Experiments](#real-world-experiments)
+  - [Running](#running)
+    - [Quick Start](#quick-start)
+    - [Task Options](#task-options)
+    - [Algorithm Options](#algorithm-options)
+    - [Ablation Study Options](#ablation-study-options)
+  - [Figures](#figures)
+- [Citation](#citation)
 
 ## Installation (Algorithm + Simulated Panda Environments)
 Our method and code is built on [learning from guided play (LfGP)](https://github.com/utiasSTARS/lfgp).
@@ -89,6 +91,7 @@ Common options you can change to reproduce our main results are:
 | `--reward_model`       | `discrimininator`,`sqil`,`rce`,`sparse` | Reward model                                                                          |
 | `--single_task`        | (Add to turn on, otherwise off)         | Run without ACE/LfGP framework                                                        |
 | `--q_over_max_penalty` | Float (default `10.0`)                  | Strength of value penalization (\lambda from the paper). Set to `0.0` to turn VP off. |
+| `--q_regularizer` | `vp`,`c2f`,`cql`                  | Type of value penalization method. Set to `0.0` to turn VP off. |
 
 ### Ablation Study Options
 
