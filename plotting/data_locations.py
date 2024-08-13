@@ -54,6 +54,8 @@ main = {
         'sqil-no-vp':        "sqil/apr15_envfix_noqovermax",
         'sqil-rnd':          "sqil/sqil_rnd",
         'disc-no-vp':        "disc/dac",
+        'qreg-ace-sqil':         "multi-sqil/c2f",
+        'cql-ace-sqil':          "multi-sqil/cql",
     },
     'stack_no_move_0': {
         'multi-sqil':        "multi-sqil/feb26_avgexpqmax",

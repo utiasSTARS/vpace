@@ -40,6 +40,8 @@ parser.add_argument('--custom_algo_list', type=str, default="",
 parser.add_argument('--bottom_legend', action='store_true')
 parser.add_argument('--use_rliable', action='store_true')
 parser.add_argument('--rliable_num_reps', type=int, default=20000)
+parser.add_argument('--table_timestep', type=int, default=300000)
+parser.add_argument('--print_table', action='store_true')
 args = parser.parse_args()
 
 # since this is the plot we're using
@@ -182,6 +184,46 @@ if 'panda_3_overall' in args.plot or 'avgs' in args.plot:
             all_successes[task][algo] = None
             all_returns[task][algo] = None
 
+if args.print_table:
+    data_path = os.path.join(fig_path, 'data', 'rliable')
+    lines = []
+    lines.append(f"|  | {' | '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in valid_algos)} |")
+    lines.append(f"| - |{' - |' * len(valid_algos)}")
+    print(f"|  | {' | '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in valid_algos)} |")  # header line
+    print(f"| - |{' - |' * len(valid_algos)}")
+    for task_i, (task_title, task) in enumerate(zip(task_titles, task_dir_names)):
+        line = f"| {task_title} |"
+        for algo in valid_algos:
+            algo_title = plot_common.ALGO_TITLE_DICT[algo]['title']
+            if 'Main Tasks' in task:
+                # all_algo_data = between_task_mean_std[task]
+                # for algo in valid_algos:
+                data = between_task_mean_std[task][algo]
+                iqm_scores = data['iqm_scores']
+                iqm_cis = data['iqm_cis'].T
+            else:
+                eval_interval = eval_intervals[task_i]
+                # data = all_successes[task]
+                # for algo in valid_algos:
+                if args.plot in ['abl_reg', 'abl_rew_model']:
+                    data_file = os.path.join(data_path, f'r-{task}-{algo}.pkl')
+                else:
+                    data_file = os.path.join(data_path, f's-{task}-{algo}.pkl')
+                data = pickle.load(open(data_file, 'rb'))
+                iqm_scores = data['iqm_scores']
+                iqm_cis = data['iqm_cis']
+                # algo_title = plot_common.ALGO_TITLE_DICT[algo]['title']
+
+            # data_i = args.table_timestep // eval_interval
+            data_i = len(iqm_scores) // 2
+            line += f" {iqm_scores[data_i]:.2f} [{iqm_cis[0, data_i]:.2f}, {iqm_cis[1, data_i]:.2f}] |"
+        print(line)
+        lines.append(line)
+    with open(os.path.join(fig_path, 'table.md'), 'w') as f:
+        for l in lines:
+            f.write(f"{l}\n")
+    import ipdb; ipdb.set_trace()
+
 # skip even considering success rate for combined plot
 if 'hardest' in args.plot:
     for task in all_successes.keys():
@@ -307,7 +349,7 @@ for task_i, task in enumerate(task_dir_names):
                 label = algo_titles[algo_i] if task_i == 0 else ""
 
             # hardcode replace VP-DAC with DAC, VPACE-SQIL with VPACE
-            if 'panda_3' in args.plot or 'avgs' in args.plot:
+            if 'panda_3' in args.plot or 'avgs' in args.plot or 'real' in args.plot:
                 if task_i == 0:
                     if algo == 'disc':
                         label = "DAC"
@@ -471,7 +513,7 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
         print("TODO need to position legend properly for this case!!!")
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.81, 0.075))
     elif fig_shape == [2, 3]:
-        fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(1.03, 0.3))
+        fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(1.15, 0.2))
     elif fig_shape == [2, 1]:
         if args.bigger_labels:
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.5, -0.18))

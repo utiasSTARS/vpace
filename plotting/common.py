@@ -58,7 +58,8 @@ MULTITASK_ALGOS = [
 
 ALGO_TITLE_DICT = OrderedDict({
     'multi-sqil':{
-        'title': 'VPACE-SQIL',
+        # 'title': 'VPACE-SQIL',
+        'title': 'VPACE',
         'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest',
                   'hardest_4', 'real', 'hardest_5', 'panda_3_overall', 'panda_3_hardest_overall', 'best_4_overall',
                   'abl_reg', 'abl_lambda'},
@@ -71,7 +72,8 @@ ALGO_TITLE_DICT = OrderedDict({
         'cmap_i': 2,
     },
     'multi-sqil-no-vp':{
-        'title': 'ACE-SQIL',
+        # 'title': 'ACE-SQIL',
+        'title': 'ACE',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4'},
         # 'cmap_i': 6,
         'cmap_i': 2,
