@@ -332,7 +332,8 @@ HAND_TASK_SETTINGS = OrderedDict({
 AVG_ENVS_DICT = OrderedDict({
     'all': {
         'valid_task_settings': {**PANDA_TASK_SETTINGS, **RCE_TASK_SETTINGS, **HAND_TASK_SETTINGS, **REAL_PANDA_TASK_SETTINGS},
-        'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc'],
+        # 'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc'],
+        'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc-no-vp'],
         # 'valid_algos': ['multi-sqil', 'multi-sqil-no-vp', 'sqil', 'sqil-no-vp', 'rce'],
         'title': "All Envs/Tasks (Average)",
         'num_timesteps_mean': 5,

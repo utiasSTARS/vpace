@@ -32,8 +32,8 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/dummy",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
-        # 'disc-no-vp':              "disc/aug8_dac",
-        'disc-no-vp':              "disc/apr2",
+        'disc-no-vp':              "disc/aug8_dac",
+        # 'disc-no-vp':              "disc/apr2",
         'sqil-rnd':          "sqil/sqil_rnd",
     },
     'relocate-human-v0-najp-dp': {
@@ -64,8 +64,8 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
-        # 'disc-no-vp':              "disc/aug8_dac",
-        'disc-no-vp':              "disc/mar31",
+        'disc-no-vp':              "disc/aug8_dac",
+        # 'disc-no-vp':              "disc/mar31",
         'sqil-rnd':          "sqil/sqil_rnd",
     },
     'hammer-human-v0': {
@@ -80,8 +80,8 @@ main_performance = {
         'sqil_theirs_nstepoff': "sqil_theirs_nstepoff/apr1",
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
-        # 'disc-no-vp':              "disc/aug8_dac",
-        'disc-no-vp':              "disc/mar31",
+        'disc-no-vp':              "disc/aug8_dac",
+        # 'disc-no-vp':              "disc/mar31",
         'sqil-rnd':          "sqil/sqil_rnd",
     },
     'relocate-human-v0': {

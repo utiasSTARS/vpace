@@ -14,8 +14,8 @@ main = {
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
         'sqil-rnd':          "sqil/sqil_rnd",
-        # 'disc-no-vp':        "disc/dac",
-        'disc-no-vp':        "disc/feb24_newqmax_fixed",
+        'disc-no-vp':        "disc/dac",
+        # 'disc-no-vp':        "disc/feb24_newqmax_fixed",
     },
     'lift_0': {
         'multi-sqil':        "multi-sqil/feb24_newqmax_fixed",
@@ -27,8 +27,8 @@ main = {
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
         'sqil-rnd':          "sqil/sqil_rnd",
-        # 'disc-no-vp':        "disc/dac",
-        'disc-no-vp':        "disc/feb24_newqmax_fixed",
+        'disc-no-vp':        "disc/dac",
+        # 'disc-no-vp':        "disc/feb24_newqmax_fixed",
     },
     'move_obj_0': {
         'multi-sqil':        "multi-sqil/feb24_newqmax_fixed",
@@ -40,8 +40,8 @@ main = {
         'multi-sqil-no-vp':          "multi-sqil/apr4_noqovermax",
         'sqil-no-vp':        "sqil/apr4_noqovermax",
         'sqil-rnd':          "sqil/sqil_rnd",
-        # 'disc-no-vp':        "disc/dac",
-        'disc-no-vp':        "disc/feb24_newqmax_fixed",
+        'disc-no-vp':        "disc/dac",
+        # 'disc-no-vp':        "disc/feb24_newqmax_fixed",
     },
     'unstack_stack_env_only_no_move_0': {
         'multi-sqil':        "multi-sqil/apr15_envfix",
