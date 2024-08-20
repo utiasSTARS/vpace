@@ -31,6 +31,7 @@ parser.add_argument('--bigger_labels', action='store_true')
 parser.add_argument('--real_x_axis', action='store_true')
 parser.add_argument('--use_rliable', action='store_true')
 parser.add_argument('--rliable_num_reps', type=int, default=20000)
+parser.add_argument('--side_legend', action='store_true')
 args = parser.parse_args()
 
 fig_name = f"{args.plot}_envs_avg"
@@ -166,15 +167,20 @@ bbox_to_anchor_dict = {
 }
 
 if args.plot == 'all':
-    ncol = 2
-    if args.force_vert_squish:
-        if args.bigger_labels:
-            bbox_to_anchor = (0.45, -.61)
-        else:
-            bbox_to_anchor = (0.45, -.55)
+    if args.side_legend:
+        ncol = 1
+        bbox_to_anchor = (1.15, .15)
+        fsize = font_size - 2
     else:
-        bbox_to_anchor = (0.45, -.4)
-    fsize = font_size - 2
+        ncol = 2
+        if args.force_vert_squish:
+            if args.bigger_labels:
+                bbox_to_anchor = (0.45, -.61)
+            else:
+                bbox_to_anchor = (0.45, -.55)
+        else:
+            bbox_to_anchor = (0.45, -.4)
+        fsize = font_size - 2
 elif args.plot == 'all_4_sep':
     ncol = 4
     bbox_to_anchor = (0.5, -.425)
@@ -204,6 +210,8 @@ if args.real_x_axis:
     fig_name = f"real_x_{fig_name}"
 if args.use_rliable:
     fig_name = f"rliable_{fig_name}"
+if args.side_legend:
+    fig_name = f"sideleg_{fig_name}"
 
 os.makedirs(fig_path, exist_ok=True)
 r_fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')

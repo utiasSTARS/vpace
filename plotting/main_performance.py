@@ -496,7 +496,10 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
     elif args.plot == 'hardest':
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=1, bbox_to_anchor=(0.99, 0.075))
     elif fig_shape == [1, 2] or fig_shape == [1, 1]:
-        num_col = np.ceil(len(valid_algos) / 2)
+        if len(valid_algos) > 2:
+            num_col = np.ceil(len(valid_algos) / 2)
+        else:
+            num_col = len(valid_algos)
         if side_legend:
             bbta = (1.15, 0.25)
             if args.plot == 'abl_exaug':
@@ -504,8 +507,12 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
                         ncol=1, bbox_to_anchor=bbta)
         else:
+            if len(valid_algos) == 2:
+                bbta = (0.5, -.2)
+            else:
+                bbta = (0.5, -.53)
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
-                        ncol=num_col, bbox_to_anchor=(0.5, -0.53))
+                        ncol=num_col, bbox_to_anchor=bbta)
     elif fig_shape == [2, 4] and sum(valid_task) == 8:
         # legend underneath
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.11))
