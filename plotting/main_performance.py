@@ -510,7 +510,8 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
             if len(valid_algos) == 2:
                 bbta = (0.5, -.2)
             else:
-                bbta = (0.5, -.53)
+                # bbta = (0.5, -.53)
+                bbta = (0.5, -.34)
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
                         ncol=num_col, bbox_to_anchor=bbta)
     elif fig_shape == [2, 4] and sum(valid_task) == 8:

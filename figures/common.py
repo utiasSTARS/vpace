@@ -24,10 +24,11 @@ PANDA_SETTINGS_DICT = {
     'reach_0': {'last_model': '200000.pt', 'title': 'Reach', 'main': 1},
     'lift_0': {'last_model': '200000.pt', 'title': 'Lift', 'main': 2},
     'move_obj_0': {'last_model': '200000.pt', 'title': 'Move', 'main': 4, 'multi-sqil-model': 2, 'timeout': 40},
-    'unstack_stack_env_only_no_move_0': {'last_model': '500000.pt', 'title': 'Unstack-Stack', 'main': 2},
+    'unstack_stack_env_only_no_move_0': {'last_model': '500000.pt', 'half_model': '250000.pt',
+                                         'title': 'Unstack-Stack', 'main': 2},
     'stack_no_move_0': {'last_model': '500000.pt', 'title': 'Stack', 'main': 2},
     'bring_no_move_0': {'last_model': '500000.pt', 'title': 'Bring', 'main': 2},
-    'insert_no_bring_no_move_0': {'last_model': '1000000.pt', 'title': 'Insert', 'main': 2},
+    'insert_no_bring_no_move_0': {'last_model': '1000000.pt', 'half_model': '500000.pt', 'title': 'Insert', 'main': 2},
 }
 
 SAWYER_HAND_SETTINGS_DICT = {
@@ -169,12 +170,12 @@ def set_cam(args, task, env):
         env.env.gripper._internal_substep_render_func = partial(
             env.env.render, mode=args.panda_cam_str, substep_render=True)
 
-def get_ts_imgs(args, task, env, ts):
+def get_ts_imgs(args, task, env, ts, get_panda_substeps=True):
     if 'sawyer' in task or 'human' in task:
         img = env.unwrapped.render('rgb_array', width=args.img_w, height=args.img_h)
         imgs = [img]
     else:
-        if ts == 0:
+        if ts == 0 or not get_panda_substeps:
             img, _ = env.env.render(args.panda_cam_str)
             imgs = [img]
         else:

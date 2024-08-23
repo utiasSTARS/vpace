@@ -100,7 +100,7 @@ ALGO_TITLE_DICT = OrderedDict({
     'disc':{
         'title': 'VP-DAC',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'panda_3_overall', 'panda_3_hardest_overall'
-                  , 'best_4_overall', 'abl_rew_model'},
+                  , 'best_4_overall'},
         'cmap_i': 3,
     },
     'rce':{
@@ -118,7 +118,7 @@ ALGO_TITLE_DICT = OrderedDict({
     },
     'disc-no-vp': {
         'title': 'DAC',
-        'plots': {'main', 'rce', 'hand',},
+        'plots': {'main', 'rce', 'hand', 'abl_rew_model'},
         # 'cmap_i': 9,
         'cmap_i': 6,
     },
@@ -256,9 +256,9 @@ PANDA_TASK_SETTINGS = OrderedDict({
     "lift_0": {'main_task_i': 2, 'eval_intervals': 10000},
     "move_obj_0": {'main_task_i': 4, 'eval_intervals': 10000},
     "stack_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000},
-    "unstack_stack_env_only_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000},
+    "unstack_stack_env_only_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000, 'title': 'Unstack-Stack'},
     "bring_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000},
-    "insert_no_bring_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000}
+    "insert_no_bring_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000, 'title': 'Insert'}
 })
 
 
