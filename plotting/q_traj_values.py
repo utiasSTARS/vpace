@@ -66,7 +66,7 @@ if args.us_and_insert:
     # - env seed 0, seed 4 (index 3), unstack
 
     tasks = ['unstack_stack_env_only_no_move_0', 'insert_no_bring_no_move_0']
-    # tasks = ['insert_no_bring_no_move_0', 'unstack_stack_env_only_no_move_0'] # TODO TEMP FOR TESTING, DELETE
+    # tasks = ['insert_no_bring_no_move_0', 'unstack_stack_env_only_no_move_0']
     # args.algo_lists = 'multi-sqil,multi-sqil-no-vp'
     # args.algo_lists = 'multi-sqil-no-vp,,multi-sqil'
     args.algo_lists = 'multi-sqil-no-vp,multi-sqil'

@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 
+
 CUSTOM_ALGO_LIST_DICT = {
     'overall': ['multi-sqil', 'sqil-no-vp', 'disc', 'rce'],
     'overall_and_ace': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'disc-no-vp', 'rce'],
-    'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'sqil-rnd', 'disc-no-vp', 'rce']
+    # 'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'sqil-rnd', 'disc-no-vp', 'rce']
+    'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'rce', 'disc-no-vp', 'sqil-rnd']
 }
 
 
@@ -69,7 +71,7 @@ ALGO_TITLE_DICT = OrderedDict({
         'title': 'VPACE-DAC',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4'},
         # 'plots': {'main', 'rce'},
-        'cmap_i': 2,
+        'cmap_i': 1,
     },
     'multi-sqil-no-vp':{
         # 'title': 'ACE-SQIL',
@@ -81,13 +83,13 @@ ALGO_TITLE_DICT = OrderedDict({
     'multi-rce':{
         'title': 'ACE-RCE',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4'},
-        'cmap_i': 4,
+        'cmap_i': 3,
     },
     'sqil':{
         'title': 'VP-SQIL',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'abl_all'},
         # 'plots': {'main', 'rce'},
-        'cmap_i': 1,
+        'cmap_i': 5,
     },
     'sqil-no-vp':{
         'title': 'SQIL',
@@ -101,7 +103,7 @@ ALGO_TITLE_DICT = OrderedDict({
         'title': 'VP-DAC',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'panda_3_overall', 'panda_3_hardest_overall'
                   , 'best_4_overall'},
-        'cmap_i': 3,
+        'cmap_i': 7,
     },
     'rce':{
         'title': 'RCE',
