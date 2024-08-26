@@ -42,6 +42,8 @@ parser.add_argument('--use_rliable', action='store_true')
 parser.add_argument('--rliable_num_reps', type=int, default=20000)
 parser.add_argument('--table_timestep', type=int, default=300000)
 parser.add_argument('--print_table', action='store_true')
+parser.add_argument('--table_type', type=str, default='md', choices=['md', 'latex'])
+parser.add_argument('--table_valid_algos', type=str, default='', choices=['', 'overall_and_ace_and_rnd'])
 args = parser.parse_args()
 
 # since this is the plot we're using
@@ -184,16 +186,35 @@ if 'panda_3_overall' in args.plot or 'avgs' in args.plot:
             all_successes[task][algo] = None
             all_returns[task][algo] = None
 
+def rm_lead_zero(f):
+    # Convert to string and remove the leading zero if necessary
+    # return f"{f:.2f}".lstrip('0') if f < 1 and f > -1 else f"{f:.2f}"
+    return f"{f:.2f}" if f < 1 and f > -1 else f"{f:.2f}"
+
 if args.print_table:
+    if args.table_valid_algos == '':
+        table_valid_algos = valid_algos
+    else:
+        table_valid_algos = plot_common.CUSTOM_ALGO_LIST_DICT[args.table_valid_algos]
+
     data_path = os.path.join(fig_path, 'data', 'rliable')
     lines = []
-    lines.append(f"|  | {' | '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in valid_algos)} |")
-    lines.append(f"| - |{' - |' * len(valid_algos)}")
-    print(f"|  | {' | '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in valid_algos)} |")  # header line
-    print(f"| - |{' - |' * len(valid_algos)}")
+    if args.table_type == 'md':
+        lines.append(f"|  | {' | '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in table_valid_algos)} |")
+        lines.append(f"| - |{' - |' * len(table_valid_algos)}")
+        print(f"|  | {' | '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in table_valid_algos)} |")  # header line
+        print(f"| - |{' - |' * len(table_valid_algos)}")
+    else:
+        lines.append(f"& {' & '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in table_valid_algos)} \\\\")
+        lines.append('\\midrule')
+        print(f"{' & '.join(plot_common.ALGO_TITLE_DICT[algo]['title'] for algo in table_valid_algos)} \\\\")
+        print('\\midrule')
     for task_i, (task_title, task) in enumerate(zip(task_titles, task_dir_names)):
-        line = f"| {task_title} |"
-        for algo in valid_algos:
+        if args.table_type == 'md':
+            line = f"| {task_title} |"
+        else:
+            line = f" {task_title} &"
+        for algo_i, algo in enumerate(table_valid_algos):
             algo_title = plot_common.ALGO_TITLE_DICT[algo]['title']
             if 'Main Tasks' in task:
                 # all_algo_data = between_task_mean_std[task]
@@ -205,7 +226,7 @@ if args.print_table:
                 eval_interval = eval_intervals[task_i]
                 # data = all_successes[task]
                 # for algo in valid_algos:
-                if args.plot in ['abl_reg', 'abl_rew_model']:
+                if args.plot in ['abl_reg', 'abl_rew_model', 'rce', 'hand']:
                     data_file = os.path.join(data_path, f'r-{task}-{algo}.pkl')
                 else:
                     data_file = os.path.join(data_path, f's-{task}-{algo}.pkl')
@@ -214,12 +235,31 @@ if args.print_table:
                 iqm_cis = data['iqm_cis']
                 # algo_title = plot_common.ALGO_TITLE_DICT[algo]['title']
 
+            if 'human' in task:
+                iqm_scores /= 1000
+                iqm_cis /= 1000
+                iqm_scores = np.maximum(iqm_scores, 0)
+                iqm_cis = np.maximum(iqm_cis, 0)
+
             # data_i = args.table_timestep // eval_interval
+
+            # TODO potentially take data as an average across multiple timesteps here
+
             data_i = len(iqm_scores) // 2
-            line += f" {iqm_scores[data_i]:.2f} [{iqm_cis[0, data_i]:.2f}, {iqm_cis[1, data_i]:.2f}] |"
+            if args.table_type == 'md':
+                line += f" {iqm_scores[data_i]:.2f} [{iqm_cis[0, data_i]:.2f}, {iqm_cis[1, data_i]:.2f}] |"
+            else:
+                # score_str = f"{iqm_scores[data_i]:.2f}".lstrip('0')
+                if algo_i < len(table_valid_algos) - 1:
+                    line += f" {rm_lead_zero(iqm_scores[data_i])} [{rm_lead_zero(iqm_cis[0, data_i])}, "\
+                            f"{rm_lead_zero(iqm_cis[1, data_i])}] &"
+                else:
+                    line += f" {rm_lead_zero(iqm_scores[data_i])} [{rm_lead_zero(iqm_cis[0, data_i])}, "\
+                            f"{rm_lead_zero(iqm_cis[1, data_i])}] \\\\"
         print(line)
         lines.append(line)
-    with open(os.path.join(fig_path, 'table.md'), 'w') as f:
+    table_file = "table.md" if args.table_type == 'md' else "latex-table.txt"
+    with open(os.path.join(fig_path, table_file), 'w') as f:
         for l in lines:
             f.write(f"{l}\n")
     import ipdb; ipdb.set_trace()
