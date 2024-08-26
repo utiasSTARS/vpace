@@ -30,7 +30,8 @@ parser.add_argument('--us_and_insert', action='store_true')
 # parser.add_argument('--all_tasks', action='store_true')
 parser.add_argument('--env_plot', type=str, choices=['single', 'panda', 'sawyer', 'hand'], default='single')
 # parser.add_argument('--algo_list', type=str, default='multi-sqil,multi-sqil-no-vp,sqil,sqil-no-vp,disc,rce')
-parser.add_argument('--algo_lists', type=str, default='sqil,sqil-no-vp,,multi-sqil,multi-sqil-no-vp')
+# parser.add_argument('--algo_lists', type=str, default='sqil,sqil-no-vp,,multi-sqil,multi-sqil-no-vp')
+parser.add_argument('--algo_lists', type=str, default='multi-sqil,multi-sqil-no-vp')
 # parser.add_argument('--aux_task', type=int, default=2)
 # parser.add_argument('--model', type=str, default='500000.pt')
 parser.add_argument('--model_train_prop', type=float, default=1.0)
@@ -48,6 +49,7 @@ parser.add_argument('--bigger_labels', action='store_true')
 parser.add_argument('--log_y_axis', action='store_true')
 parser.add_argument('--compare_max_direct', action='store_true')
 parser.add_argument('--model_str', type=str, default='last')
+parser.add_argument('--horizontal_tasks', action='store_true')
 
 # img options
 parser.add_argument('--save_ep_imgs', action='store_true')
@@ -100,7 +102,11 @@ plt.rc('text.latex', preamble=r'\usepackage{amsmath} \usepackage{amsfonts} \usep
 if args.us_and_insert:
     fig_path = os.path.join(args.top_save_dir, "us_and_insert")
     fig_name = f"plot{args.extra_name}.pdf"
-    os.makedirs(os.path.join(args.top_save_dir, "us_and_insert"), exist_ok=True)
+    os.makedirs(fig_path, exist_ok=True)
+elif args.env_plot != 'single':
+    fig_path = os.path.join(args.top_save_dir, args.env_plot)
+    fig_name = f"plot{args.extra_name}.pdf"
+    os.makedirs(fig_path, exist_ok=True)
 elif len(tasks) == 1:
     # fig_path = os.path.join(args.top_save_dir, f"{tasks[0][:15]}.pdf")
     fig_path = os.path.join(args.top_save_dir, f"{tasks[0]}")
@@ -115,7 +121,10 @@ if not args.render_no_plot:
     if args.us_and_insert:
         fig_shape = [len(algo_lists), len(tasks)]
     else:
-        fig_shape = [len(tasks), len(algo_lists)]
+        if args.horizontal_tasks:
+            fig_shape = [len(algo_lists), len(tasks)]
+        else:
+            fig_shape = [len(tasks), len(algo_lists)]
 
     if args.force_vert_squish:
         plot_size[0] = 4.2
@@ -166,6 +175,8 @@ for task_i, task in enumerate(tasks):
                 model_str = task_settings_dict['last_model']
             elif args.model_str == 'half':
                 model_str = task_settings_dict['half_model']
+            elif args.model_str == 'qtfig':
+                model_str = task_settings_dict['qtfig_model']
             else:
                 model_str = f"{args.model_str}.pt"
 
@@ -348,7 +359,7 @@ for task_i, task in enumerate(tasks):
                 all_seed_max = convolve1d(all_seed_max, convolv_op, axis=0, mode='nearest')
 
             # plot setup
-            if args.us_and_insert:
+            if args.us_and_insert or args.horizontal_tasks:
                 ax = axes[algo_list_i, task_i]
             else:
                 ax = axes[task_i, algo_list_i]
@@ -391,8 +402,11 @@ for task_i, task in enumerate(tasks):
 
             # ax.axhline(mean_expert.max(), linewidth=linewidth, color=cmap(cmap_i), linestyle=(0, (3, 1, 1, 1)))
 
-        if args.us_and_insert and algo_list_i == 0:
-            ax.set_title(f"{task_settings_dict['title']}", fontsize=font_size)
+        if (args.us_and_insert or args.horizontal_tasks) and algo_list_i == 0:
+            if args.env_plot == 'panda' or args.env_plot == 'single':
+                ax.set_title(f"{task_settings_dict['title']}", fontsize=font_size)
+            else:
+                ax.set_title(task, fontsize=font_size)
 
         if args.compare_max_direct:
             # TODO this doesn't work right now, and is probably a bad idea because each seed has very different expert maximums
@@ -435,7 +449,7 @@ for row_i in range(fig_shape[0]):
         task_settings_dict = fig_common.PANDA_SETTINGS_DICT[task]
         title = task_settings_dict['title']
 
-    if not args.us_and_insert:
+    if not (args.us_and_insert or args.horizontal_tasks):
         ax.set_title(f"{title}", fontsize=font_size)
     ax.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 
@@ -497,7 +511,7 @@ if len(tasks) == 1:
         leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=3,
                 bbox_to_anchor=(0.475, -.4))
 else:
-    if args.us_and_insert:
+    if args.us_and_insert or args.horizontal_tasks:
         if len(algo_lists) == 1:
             leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=3,
                         bbox_to_anchor=(0.475, -.4))

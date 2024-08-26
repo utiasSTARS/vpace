@@ -29,14 +29,15 @@ parser.add_argument('--plot', type=str, default='main',
                     choices=['main', 'rce', 'hand', 'abl_expert', 'abl_alg', 'abl_dquant', 'rce_hand_theirs',
                              'abl_all', 'abl_exaug', 'hardest', 'hardest_4', 'real', 'hardest_5', 'panda_3_overall',
                              'panda_3_hardest_overall', 'best_4_overall', 'panda_2_and_avgs', 'abl_reg', 'abl_rew_model',
-                             'abl_lambda', 'panda_2_and_all_avgs'])
+                             'abl_lambda', 'panda_2_and_all_avgs', 'all_sep', 'abl_dquant_lambda', 'all_avgs'])
 parser.add_argument('--extra_name', type=str, default="")
 parser.add_argument('--vertical_plot', action='store_true')
 parser.add_argument('--force_vert_squish', action='store_true')
 parser.add_argument('--constrained_layout', action='store_true')
 parser.add_argument('--bigger_labels', action='store_true')
 parser.add_argument('--custom_algo_list', type=str, default="",
-                    choices=['overall', 'overall_and_ace', 'overall_and_ace_and_rnd'])
+                    choices=['overall', 'overall_and_ace', 'overall_and_ace_and_rnd', 'ace_variations',
+                             'ace_variations_and_vpsqil', 'vp_variations', 'vpace_ace_sqil'])
 parser.add_argument('--bottom_legend', action='store_true')
 parser.add_argument('--use_rliable', action='store_true')
 parser.add_argument('--rliable_num_reps', type=int, default=20000)
@@ -44,10 +45,11 @@ parser.add_argument('--table_timestep', type=int, default=300000)
 parser.add_argument('--print_table', action='store_true')
 parser.add_argument('--table_type', type=str, default='md', choices=['md', 'latex'])
 parser.add_argument('--table_valid_algos', type=str, default='', choices=['', 'overall_and_ace_and_rnd'])
+parser.add_argument('--one_row', action='store_true')
 args = parser.parse_args()
 
 # since this is the plot we're using
-if args.plot in ['panda_2_and_avgs', 'panda_3_overall', 'panda_2_and_all_avgs']:
+if args.plot in ['panda_2_and_avgs', 'panda_3_overall', 'panda_2_and_all_avgs', 'all_avgs']:
     args.custom_algo_list = 'overall_and_ace_and_rnd'
     # args.custom_algo_list = 'overall_and_ace'
 
@@ -83,7 +85,7 @@ elif args.plot == 'real':
     data_locs = real_data_locations
 elif args.plot == 'rce_hand_theirs':
     data_locs = {**rce_data_locations, **hand_data_locations}
-elif 'hardest' in args.plot or 'panda_3' in args.plot or 'best' in args.plot or 'avgs' in args.plot:
+elif 'hardest' in args.plot or 'panda_3' in args.plot or 'best' in args.plot or 'avgs' in args.plot or 'all' in args.plot:
     # data_locs = {**data_locations.main, **rce_data_locations, **hand_data_locations}
     data_locs = {**data_locations.main, **rce_data_locations, **hand_data_locations, **real_data_locations}
 else:
@@ -95,6 +97,9 @@ else:
 plt.rcParams.update({"text.usetex": True, "font.family": "serif"})
 plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
 
+if args.one_row:
+    fig_shape = [1, len(task_dir_names)]
+
 if args.force_vert_squish:
     if args.constrained_layout:
         plot_size = [3.2, 2.7]
@@ -104,6 +109,10 @@ if args.force_vert_squish:
 
 if args.plot == 'panda_2_and_all_avgs':
     fig_shape = [1, 5]
+    plot_size[0] -= .7
+
+if args.plot == 'all_avgs':
+    fig_shape = [1, 3]
     plot_size[0] -= .7
 
 if args.bigger_labels:
@@ -159,7 +168,7 @@ if 'panda_3_overall' in args.plot or 'avgs' in args.plot:
     # between_task_args.plot = 'all_4_sep'
     if args.plot == 'panda_2_and_avgs':
         between_task_args.plot = 'panda_sawyer_sep'
-    elif args.plot == 'panda_2_and_all_avgs':
+    elif args.plot == 'panda_2_and_all_avgs' or args.plot == 'all_avgs':
         between_task_args.plot = 'all_3_sep'
     elif args.plot == 'panda_3_overall':
         between_task_args.plot = 'main'
@@ -522,12 +531,12 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
     else:
         if args.constrained_layout:
             if args.plot == "hand":
-                fig.supylabel(r"Episode Return ($\times$1000)", fontsize=label_font_size)
+                fig.supylabel(r"Episode Return ($\times$1k)", fontsize=label_font_size)
             else:
                 fig.supylabel("Episode Return", fontsize=label_font_size)
         else:
             if args.plot == 'hand':
-                ax.set_ylabel(r"Episode Return ($\times$1000)", fontsize=label_font_size, labelpad=y_label_pad)
+                ax.set_ylabel(r"Episode Return ($\times$1k)", fontsize=label_font_size, labelpad=y_label_pad)
             else:
                 ax.set_ylabel("Episode Return", fontsize=label_font_size, labelpad=y_label_pad)
 
@@ -554,6 +563,10 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
                 bbta = (0.5, -.34)
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
                         ncol=num_col, bbox_to_anchor=bbta)
+    elif fig_shape == [1, 3] and len(valid_algos) > 3:
+        fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
+                        ncol=int(math.ceil((len(valid_algos) + 1)) / 2),
+                        bbox_to_anchor=(0.5, -0.33))
     elif fig_shape == [2, 4] and sum(valid_task) == 8:
         # legend underneath
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.11))
@@ -610,18 +623,25 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
 
     if args.vertical_plot:
         fig_name = f"vert_{fig_name}"
-
     if args.force_vert_squish:
         fig_name = f"squish_{fig_name}"
-
     if args.constrained_layout:
         fig_name = f"constrained_{fig_name}"
-
     if not side_legend:
         fig_name = f"bottom_legend_{fig_name}"
-
     if args.use_rliable:
         fig_name = f"rliable_{fig_name}"
+    if args.one_row:
+        fig_name = f"one_row_{fig_name}"
+
+    fig_name = f"{args.custom_algo_list}_{fig_name}"
+
+    # if args.custom_algo_list == 'ace_variations':
+    #     fig_name = f"ace_var_{fig_name}"
+    # if args.custom_algo_list == 'ace_variations_and_vpsqil':
+    #     fig_name = f"ace_var_vpsqil_{fig_name}"
+    # if args.custom_algo_list == 'vp_variations':
+    #     fig_name = f"vp_var_{fig_name}"
 
     os.makedirs(fig_path, exist_ok=True)
     fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')

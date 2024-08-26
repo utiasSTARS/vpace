@@ -102,6 +102,8 @@ for plot_i, r_ax in enumerate(r_axes_flat):
                     label = 'VPACE'
                 elif algo == 'disc':
                     label = 'DAC'
+                # elif algo == 'sqil-rnd':
+                #     label = "RND"
                 else:
                     label = plot_common.ALGO_TITLE_DICT[algo]['title']
             else:
@@ -169,7 +171,10 @@ bbox_to_anchor_dict = {
 if args.plot == 'all':
     if args.side_legend:
         ncol = 1
-        bbox_to_anchor = (1.15, .15)
+        if len(valid_algos) == 4:
+            bbox_to_anchor = (1.15, .15)
+        elif len(valid_algos) == 5:
+            bbox_to_anchor = (1.2, .05)
         fsize = font_size - 2
     else:
         ncol = 2
