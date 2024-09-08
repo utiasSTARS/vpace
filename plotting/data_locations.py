@@ -110,20 +110,20 @@ abl_expert = {
     }
 }
 
-abl_dquat_labmda = {
+abl_dquant_lambda = {
     'unstack_stack_env_only_no_move_0': {
         'multi-sqil':       "multi-sqil/apr15_envfix",
-        '20_data':          "multi-sqil/apr15_envfix_10data",
+        '10_data':          "multi-sqil/apr15_envfix_10data",
         '100_data':         "multi-sqil/apr15_envfix_100data",
         'qomp1':    "multi-sqil/apr15_envfix_qomp1",
         'qomp100':    "multi-sqil/apr15_envfix_qomp100",
     },
     'insert_no_bring_no_move_0': {
         'multi-sqil':       "multi-sqil/feb26_avgexpqmax",
-        '20_data':          "multi-sqil/mar4_20data",  # TODO these aren't currently correct, and qomp1/qomp100 are missing
-        '100_data':         "multi-sqil/mar4_100data",
-        'qomp1':    "multi-sqil/apr15_envfix_qomp1",
-        'qomp100':    "multi-sqil/apr15_envfix_qomp100",
+        '10_data':          "multi-sqil/aug5_10data",
+        '100_data':         "multi-sqil/aug7_100data",
+        'qomp1':    "multi-sqil/aug25_qomp1",
+        'qomp100':    "multi-sqil/aug25_qomp100",
     }
 }
 
@@ -145,6 +145,7 @@ abl_rew_model = {
         'sqil':       "sqil/apr15_envfix",
         'sqil-no-vp':       "sqil/apr15_envfix_noqovermax",
         'disc':              "disc/apr15_envfix",
+        'disc-no-vp':        "disc/dac",
         'rce':               "rce/apr15_envfix",
         'ember':               "disc/ember",
         'rce-cql':               "rce/rce-cql",
@@ -153,6 +154,7 @@ abl_rew_model = {
         'sqil':       "sqil/feb26_avgexpqmax",
         'sqil-no-vp':       "sqil/apr4_noqovermax",
         'disc':              "disc/feb26_avgexpqmax",
+        'disc-no-vp':        "disc/dac",
         'rce':               "rce/feb26_avgexpqmax",
         'ember':         "disc/ember",
         'rce-cql':         "rce/rce-cql",

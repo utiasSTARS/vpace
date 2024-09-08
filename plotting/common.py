@@ -9,10 +9,16 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 
+
 CUSTOM_ALGO_LIST_DICT = {
     'overall': ['multi-sqil', 'sqil-no-vp', 'disc', 'rce'],
     'overall_and_ace': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'disc-no-vp', 'rce'],
-    'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'sqil-rnd', 'disc-no-vp', 'rce']
+    # 'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'sqil-rnd', 'disc-no-vp', 'rce']
+    'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'rce', 'disc-no-vp', 'sqil-rnd'],
+    'ace_variations': ['multi-sqil', 'multi-disc', 'multi-rce'],
+    'ace_variations_and_vpsqil': ['multi-sqil', 'multi-disc', 'multi-rce', 'sqil'],
+    'vp_variations': ['multi-sqil', 'sqil', 'sqil-no-vp'],
+    'vpace_ace_sqil': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp'],
 }
 
 
@@ -62,14 +68,14 @@ ALGO_TITLE_DICT = OrderedDict({
         'title': 'VPACE',
         'plots': {'main', 'rce', 'abl_expert', 'abl_alg', 'abl_dquant', 'hand', 'abl_all', 'abl_exaug', 'hardest',
                   'hardest_4', 'real', 'hardest_5', 'panda_3_overall', 'panda_3_hardest_overall', 'best_4_overall',
-                  'abl_reg', 'abl_lambda'},
+                  'abl_reg', 'abl_lambda', 'abl_dquant_lambda'},
         'cmap_i': 0,
     },
     'multi-disc':{
         'title': 'VPACE-DAC',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4'},
         # 'plots': {'main', 'rce'},
-        'cmap_i': 2,
+        'cmap_i': 1,
     },
     'multi-sqil-no-vp':{
         # 'title': 'ACE-SQIL',
@@ -81,13 +87,13 @@ ALGO_TITLE_DICT = OrderedDict({
     'multi-rce':{
         'title': 'ACE-RCE',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4'},
-        'cmap_i': 4,
+        'cmap_i': 3,
     },
     'sqil':{
         'title': 'VP-SQIL',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'abl_all'},
         # 'plots': {'main', 'rce'},
-        'cmap_i': 1,
+        'cmap_i': 7,
     },
     'sqil-no-vp':{
         'title': 'SQIL',
@@ -100,8 +106,8 @@ ALGO_TITLE_DICT = OrderedDict({
     'disc':{
         'title': 'VP-DAC',
         'plots': {'main', 'rce', 'hand', 'hardest', 'hardest_4', 'panda_3_overall', 'panda_3_hardest_overall'
-                  , 'best_4_overall', 'abl_rew_model'},
-        'cmap_i': 3,
+                  , 'best_4_overall'},
+        'cmap_i': 5,
     },
     'rce':{
         'title': 'RCE',
@@ -118,7 +124,7 @@ ALGO_TITLE_DICT = OrderedDict({
     },
     'disc-no-vp': {
         'title': 'DAC',
-        'plots': {'main', 'rce', 'hand',},
+        'plots': {'main', 'rce', 'hand', 'abl_rew_model'},
         # 'cmap_i': 9,
         'cmap_i': 6,
     },
@@ -133,13 +139,16 @@ ALGO_TITLE_DICT = OrderedDict({
         'cmap_i': 13,
     },
     'full_trajs':{
-        'title': '+Full Trajs',
+        # 'title': '+Full Trajs',
+        'title': '+Trajs',
         # 'title': 'LfGP (obs only)',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 8,
     },
     'full_trajs_wa':{
-        'title': '+Full Trajs \\& Acts',
+        # 'title': '+Full Trajs \\& Acts',
+        'title': '+Trajs \n \\& Acts',
+        # 'title': '+Trajs, \\\\ Acts',
         # 'title': 'LfGP (obs + act)',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 17,
@@ -162,12 +171,12 @@ ALGO_TITLE_DICT = OrderedDict({
     # },
     'qomp1':{
         'title': r'$\lambda=1$',
-        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda', 'abl_lambda'},
+        'plots': {'abl_alg', 'abl_all', 'abl_dquant_lambda', 'abl_lambda'},
         'cmap_i': 12,
     },
     'qomp100':{
         'title': r'$\lambda=100$',
-        'plots': {'abl_alg', 'abl_all', 'abl_dquat_labmda', 'abl_lambda'},
+        'plots': {'abl_alg', 'abl_all', 'abl_dquant_lambda', 'abl_lambda'},
         'cmap_i': 15,
     },
     'no_exp_random':{
@@ -181,13 +190,13 @@ ALGO_TITLE_DICT = OrderedDict({
     #     'cmap_i': 16,
     # },
     '10_data':{
-        'title': '10 Examples',
-        'plots': {'abl_dquant', 'abl_all', 'abl_exaug', 'abl_dquat_labmda'},
+        'title': '10 Ex.',
+        'plots': {'abl_dquant', 'abl_all', 'abl_exaug', 'abl_dquant_lambda'},
         'cmap_i': 16,
     },
     '100_data':{
-        'title': '100 Examples',
-        'plots': {'abl_dquant', 'abl_all', 'abl_dquat_labmda'},
+        'title': '100 Ex.',
+        'plots': {'abl_dquant', 'abl_all', 'abl_dquant_lambda'},
         'cmap_i': 18,
     },
     # '20_data_no_exp_random':{
@@ -206,7 +215,8 @@ ALGO_TITLE_DICT = OrderedDict({
         'cmap_i': 14,
     },
     'qreg-ace-sqil':{
-        'title': r'C2F: $||Q(s,a)||_2^2$',
+        # 'title': r'C2F: $||Q(s,a)||_2^2$',
+        'title': r'C2F',
         'plots': {'abl_reg'},
         'cmap_i': 19,
     },
@@ -256,9 +266,9 @@ PANDA_TASK_SETTINGS = OrderedDict({
     "lift_0": {'main_task_i': 2, 'eval_intervals': 10000},
     "move_obj_0": {'main_task_i': 4, 'eval_intervals': 10000},
     "stack_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000},
-    "unstack_stack_env_only_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000},
+    "unstack_stack_env_only_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000, 'title': 'Unstack-Stack'},
     "bring_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000},
-    "insert_no_bring_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000}
+    "insert_no_bring_no_move_0": {'main_task_i': 2, 'eval_intervals': 25000, 'title': 'Insert'}
 })
 
 
@@ -333,7 +343,7 @@ AVG_ENVS_DICT = OrderedDict({
     'all': {
         'valid_task_settings': {**PANDA_TASK_SETTINGS, **RCE_TASK_SETTINGS, **HAND_TASK_SETTINGS, **REAL_PANDA_TASK_SETTINGS},
         # 'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc'],
-        'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc-no-vp'],
+        'valid_algos': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc-no-vp', 'sqil-rnd'],
         # 'valid_algos': ['multi-sqil', 'multi-sqil-no-vp', 'sqil', 'sqil-no-vp', 'rce'],
         'title': "All Envs/Tasks (Average)",
         'num_timesteps_mean': 5,
@@ -812,6 +822,58 @@ def get_task_defaults(plot='main'):
                      'Sawyer Main Tasks',
                      'Adroit Main Tasks']
         eval_eps_per_task = [50, 50, 50, 30, 30]
+    elif plot == 'all_avgs':
+        task_titles = ['Panda (Avg)',
+                       'Sawyer (Avg)',
+                       'Adroit (Avg)']
+        num_tasks = len(task_titles)
+        valid_task = [True] * len(task_titles)
+        main_task_i = [2, 0, 0]
+        num_aux = [5, 3, 3]
+        task_data_filenames = ['train.pkl'] * num_tasks
+        # num_eval_steps_to_use = [20, 40, 50, 50, 100]
+        num_eval_steps_to_use = [100, 50, 150]
+        single_task_nestu = num_eval_steps_to_use
+        eval_intervals = [10000, 10000, 10000]
+        task_list = ['Panda Main Tasks',
+                     'Sawyer Main Tasks',
+                     'Adroit Main Tasks']
+        eval_eps_per_task = [50, 30, 30]
+    # elif plot == 'all_sep':
+    #     valid_task = [True, True, True, True, True, True, True]
+    #     task_titles = ["Reach", "Lift", "Move-Block", "Stack", "Unstack-Stack", "Bring", "Insert"]
+    #     main_task_i = [1, 2, 4, 2, 2, 2, 2]
+    #     # num_aux = [2, 4, 5, 6, 6, 6, 6]
+    #     num_aux = [2, 4, 5, 5, 5, 5, 5]
+    #     task_data_filenames = ['train.pkl', 'train.pkl', 'train.pkl', 'train.pkl', 'train.pkl', 'train.pkl', 'train.pkl']
+    #     num_eval_steps_to_use = [20, 20, 20, 20, 20, 20, 40]
+    #     # single_task_nestu = [20, 20, 20, 20, 40, 20, 40]
+    #     single_task_nestu = [20, 20, 20, 20, 20, 20, 40]
+    #     eval_intervals = [10000, 10000, 10000, 25000, 25000, 25000, 25000]
+    #     task_list = TASK_LIST
+    #     eval_eps_per_task = [50] * len(task_titles)
+
+    #     valid_task.extend([RCE_TASK_SETTINGS[task_key]['valid'] for task_key in RCE_TASK_SETTINGS.keys()])
+    #     task_titles.extend([*RCE_TASK_SETTINGS])
+    #     main_task_i.extend([0] * len(RCE_TASK_SETTINGS.keys()))
+    #     num_aux.extend([3] * len(RCE_TASK_SETTINGS.keys()))
+    #     task_data_filenames.extend(['train.pkl'] * len(RCE_TASK_SETTINGS.keys()))
+    #     num_eval_steps_to_use.extend([30, 30, 50, 50, 50, 30])
+    #     single_task_nestu.extend([30, 30, 50, 50, 50, 30])
+    #     eval_intervals = [10000] * len(RCE_TASK_SETTINGS.keys())
+    #     task_list = task_titles
+    #     eval_eps_per_task = [30] * len(RCE_TASK_SETTINGS.keys())
+
+    #     valid_task = [HAND_TASK_SETTINGS[task_key]['valid'] for task_key in HAND_TASK_SETTINGS.keys()]
+    #     task_titles = [*HAND_TASK_SETTINGS]
+    #     main_task_i = [0] * len(HAND_TASK_SETTINGS.keys())
+    #     num_aux = [3] * len(HAND_TASK_SETTINGS.keys())
+    #     task_data_filenames = ['train.pkl'] * len(HAND_TASK_SETTINGS.keys())
+    #     num_eval_steps_to_use = [50, 100, 150, 30, 50, 150]
+    #     single_task_nestu = [50, 100, 150, 30, 50, 150]
+    #     eval_intervals = [10000] * len(HAND_TASK_SETTINGS.keys())
+    #     task_list = task_titles
+    #     eval_eps_per_task = [30] * len(task_titles)
 
     out_tdn = []
     out_vt = []
@@ -850,10 +912,14 @@ def get_algo_defaults(plot='main'):
         algo_dir_names.append(k)
         if 'abl' in plot and k == 'multi-sqil':
             # algo_titles.append("VPACE-SQIL, no ablations")
-            if 'dquant' in plot:
+            if 'dquant_lambda' in plot:
+                # algo_titles.append(r"200 Ex., $\lambda=10$")
+                algo_titles.append(r"\noindent 200 Ex., \\ $\lambda=10$")
+            elif 'dquant' in plot:
                 algo_titles.append("200 Examples")
             elif 'reg' in plot:
-                algo_titles.append(r"VP: $ y(s, s') \leq y(s^*, s^*)$")
+                # algo_titles.append(r"VP: $ y(s, s') \leq y(s^*, s^*)$")
+                algo_titles.append(r"VP")
             elif plot == 'abl_lambda':
                 algo_titles.append(r'$\lambda = 10$')
             else:

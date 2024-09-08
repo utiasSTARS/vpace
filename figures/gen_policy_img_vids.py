@@ -51,6 +51,7 @@ parser.add_argument('--num_eps', type=int, default=1)
 parser.add_argument('--img_w', type=int, default=500)
 parser.add_argument('--img_h', type=int, default=500)
 parser.add_argument('--vid_save_only', action='store_true')
+parser.add_argument('--img_save_only', action='store_true')
 parser.add_argument('--all_eps_one_vid', action='store_true')
 parser.add_argument('--img_type', type=str, choices=['jpeg', 'png'], default='jpeg')
 parser.add_argument('--vid_speedup', type=float, default=1.0)
@@ -246,18 +247,19 @@ for task_i, task in enumerate(tasks):
                         cv2.imwrite(os.path.join(img_path, f"{str(img_i).zfill(3)}.{args.img_type}"), img)
                     print(f"Finished saving imgs for ep {ep_i}")
 
-                vid_path = os.path.join(args.top_save_dir, "vids", task, algo)
-                os.makedirs(vid_path, exist_ok=True)
+                if not args.img_save_only:
+                    vid_path = os.path.join(args.top_save_dir, "vids", task, algo)
+                    os.makedirs(vid_path, exist_ok=True)
 
-                if args.all_eps_one_vid:
-                    all_ep_imgs.extend(ep_imgs)
-                    print(f"ep {ep_i + 1}/{args.num_eps} complete, appending to all images")
-                else:
-                    fig_common.imgs_to_vid(vid_path=vid_path,
-                                           name=f"{str(ep_i).zfill(3)}_{speedup_str}x{sto_str}{model_save_str}",
-                                           imgs=ep_imgs, frame_rate=frame_rate, out_fr=30, resolution=args.resolution,
-                                           crf=args.crf)
-                    print(f"Finished saving vid for ep {ep_i}")
+                    if args.all_eps_one_vid:
+                        all_ep_imgs.extend(ep_imgs)
+                        print(f"ep {ep_i + 1}/{args.num_eps} complete, appending to all images")
+                    else:
+                        fig_common.imgs_to_vid(vid_path=vid_path,
+                                            name=f"{str(ep_i).zfill(3)}_{speedup_str}x{sto_str}{model_save_str}",
+                                            imgs=ep_imgs, frame_rate=frame_rate, out_fr=30, resolution=args.resolution,
+                                            crf=args.crf)
+                        print(f"Finished saving vid for ep {ep_i}")
 
             if args.all_eps_one_vid:
                 fig_common.imgs_to_vid(vid_path=vid_path,

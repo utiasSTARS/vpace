@@ -7,6 +7,8 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import convolve1d
+import cv2
+import tqdm
 
 from rl_sandbox.buffers.utils import make_buffer
 from rl_sandbox.envs.wrappers.frame_stack import FrameStackWrapper
@@ -24,10 +26,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--env_seed', type=int, default=0)
 # parser.add_argument('--task', type=str, default='insert_no_bring_no_move_0')
 parser.add_argument('--task', type=str, default='unstack_stack_env_only_no_move_0')
+parser.add_argument('--us_and_insert', action='store_true')
 # parser.add_argument('--all_tasks', action='store_true')
 parser.add_argument('--env_plot', type=str, choices=['single', 'panda', 'sawyer', 'hand'], default='single')
 # parser.add_argument('--algo_list', type=str, default='multi-sqil,multi-sqil-no-vp,sqil,sqil-no-vp,disc,rce')
-parser.add_argument('--algo_lists', type=str, default='sqil,sqil-no-vp,,multi-sqil,multi-sqil-no-vp')
+# parser.add_argument('--algo_lists', type=str, default='sqil,sqil-no-vp,,multi-sqil,multi-sqil-no-vp')
+parser.add_argument('--algo_lists', type=str, default='multi-sqil,multi-sqil-no-vp')
 # parser.add_argument('--aux_task', type=int, default=2)
 # parser.add_argument('--model', type=str, default='500000.pt')
 parser.add_argument('--model_train_prop', type=float, default=1.0)
@@ -40,11 +44,36 @@ parser.add_argument('--cam_str', type=str, default='panda_play_higher_closer')
 parser.add_argument('--stochastic', action='store_true')
 parser.add_argument('--render_no_plot', action='store_true')
 parser.add_argument('--extra_name', type=str, default='')
+parser.add_argument('--force_vert_squish', action='store_true')
+parser.add_argument('--bigger_labels', action='store_true')
+parser.add_argument('--log_y_axis', action='store_true')
+parser.add_argument('--compare_max_direct', action='store_true')
+parser.add_argument('--model_str', type=str, default='last')
+parser.add_argument('--horizontal_tasks', action='store_true')
+
+# img options
+parser.add_argument('--save_ep_imgs', action='store_true')
+parser.add_argument('--panda_cam_str', type=str, default='panda_play_higher_closer')
+parser.add_argument('--img_w', type=int, default=500)
+parser.add_argument('--img_h', type=int, default=500)
+
 args = parser.parse_args()
 
 seeds = [1,2,3,4,5]
 # algo_list = args.algo_list.split(',')
-tasks = [args.task]
+
+if args.us_and_insert:
+    # possible options:
+    # - env seed 1, seed 4 (index 3), insert
+    # - env seed 0, seed 4 (index 3), unstack
+
+    tasks = ['unstack_stack_env_only_no_move_0', 'insert_no_bring_no_move_0']
+    # tasks = ['insert_no_bring_no_move_0', 'unstack_stack_env_only_no_move_0']
+    # args.algo_lists = 'multi-sqil,multi-sqil-no-vp'
+    # args.algo_lists = 'multi-sqil-no-vp,,multi-sqil'
+    args.algo_lists = 'multi-sqil-no-vp,multi-sqil'
+else:
+    tasks = [args.task]
 
 if args.env_plot != 'single':
     if args.env_plot == 'panda':
@@ -55,7 +84,8 @@ if args.env_plot != 'single':
         tasks = list(hand_dapg_data_locations.main_performance.keys())
 
 num_timesteps_mean = 10
-log_y_axis = False
+# num_timesteps_mean = 1
+log_y_axis = args.log_y_axis
 
 # do separate algo lists per row
 algo_lists = args.algo_lists.split(',,')
@@ -69,14 +99,45 @@ max_tries = 40
 plt.rcParams.update({"text.usetex": True, "font.family": "serif"})
 plt.rc('text.latex', preamble=r'\usepackage{amsmath} \usepackage{amsfonts} \usepackage{amssymb}')
 
+if args.us_and_insert:
+    fig_path = os.path.join(args.top_save_dir, "us_and_insert")
+    fig_name = f"plot{args.extra_name}.pdf"
+    os.makedirs(fig_path, exist_ok=True)
+elif args.env_plot != 'single':
+    fig_path = os.path.join(args.top_save_dir, args.env_plot)
+    fig_name = f"plot{args.extra_name}.pdf"
+    os.makedirs(fig_path, exist_ok=True)
+elif len(tasks) == 1:
+    # fig_path = os.path.join(args.top_save_dir, f"{tasks[0][:15]}.pdf")
+    fig_path = os.path.join(args.top_save_dir, f"{tasks[0]}")
+    fig_name = f"{args.algo_lists}{args.extra_name}.pdf"
+else:
+    fig_path = os.path.join(args.top_save_dir, f"{tasks[0]}")
+    fig_name = f"{args.env_plot}-multi-task.pdf"
+
 if not args.render_no_plot:
     fig_shape, plot_size, num_stds, font_size, _, cmap, linewidth, std_alpha, _, _, _, _ = \
         plot_common.get_fig_defaults(num_plots=len(tasks))
-    fig_shape = [len(tasks), len(algo_lists)]
+    if args.us_and_insert:
+        fig_shape = [len(algo_lists), len(tasks)]
+    else:
+        if args.horizontal_tasks:
+            fig_shape = [len(algo_lists), len(tasks)]
+        else:
+            fig_shape = [len(tasks), len(algo_lists)]
+
+    if args.force_vert_squish:
+        plot_size[0] = 4.2
+        font_size += 2
+
+    if args.bigger_labels:
+        font_size += 2
+        linewidth *= 2
+
     fig, axes = plt.subplots(nrows=fig_shape[0], ncols=fig_shape[1],
                             figsize=[plot_size[0] * fig_shape[1], plot_size[1] * fig_shape[0]])
 
-    # num_stds = 1
+    num_stds = 1
 
     if fig_shape == [1, 1]:
         axes = np.array([[axes]])
@@ -110,10 +171,18 @@ for task_i, task in enumerate(tasks):
 
             # choose model based on model_train_prop  TODO not implemented yet, just manually trying earlier models first
             # model_str = '500000.pt'
-            model_str = task_settings_dict['last_model']
+            if args.model_str == 'last':
+                model_str = task_settings_dict['last_model']
+            elif args.model_str == 'half':
+                model_str = task_settings_dict['half_model']
+            elif args.model_str == 'qtfig':
+                model_str = task_settings_dict['qtfig_model']
+            else:
+                model_str = f"{args.model_str}.pt"
 
             all_seed_values = []
             all_seed_expert_values = []
+            all_ep_imgs = []
 
             for seed in seeds:
                 # load model + env if not yet loaded
@@ -135,6 +204,8 @@ for task_i, task in enumerate(tasks):
                 # run model for single episode, recording q values
                 env.seed(args.env_seed)  # exact same ep for all tests...might not create enough variety though
 
+                fig_common.set_cam(args, task, env)
+
                 got_suc_or_fail = False
                 num_tries = 0
                 while not got_suc_or_fail:
@@ -145,8 +216,12 @@ for task_i, task in enumerate(tasks):
                     ts = 0
                     all_obs = []
                     all_acts = []
+                    ep_imgs = []
                     print(f"ep {num_tries}")
                     while not done:
+                        if args.save_ep_imgs:
+                            imgs = fig_common.get_ts_imgs(args, task, env, ts, get_panda_substeps=False)
+                            ep_imgs.extend(imgs)
                         if args.render_no_plot:
                             env.render()
                         if args.stochastic:
@@ -161,7 +236,11 @@ for task_i, task in enumerate(tasks):
                         all_obs.append(obs)
                         all_acts.append(action)
 
-                        next_obs, reward, done, env_info = env.step(action)
+                        if 'sawyer' in task or 'human' in task:
+                            next_obs, reward, done, env_info = env.step(action)
+                        else:
+                            next_obs, reward, done, env_info = env.step(action, substep_render_delay=5)
+
                         next_obs = buffer_preprocess(next_obs)
 
                         # suc = auxiliary_success(observation=obs, action=action, env_info=env_info['infos'][-1])
@@ -227,6 +306,20 @@ for task_i, task in enumerate(tasks):
                     expert_q_vals = expert_q_vals[:, main_task_i]
                 all_seed_expert_values.append(expert_q_vals.detach().cpu().numpy().flatten())
 
+                if args.save_ep_imgs:
+                    all_ep_imgs.append(ep_imgs)
+                    # img_path = os.path.join(fig_path, task, algo, str(seed))
+                    # os.makedirs(img_path, exist_ok=True)
+                    # for img_i in tqdm.trange(len(ep_imgs)):
+                    #     # swap channel order
+                    #     img = cv2.cvtColor(ep_imgs[img_i], cv2.COLOR_BGRA2RGBA)
+
+                    #     # caption with value
+                    #     img = fig_common.img_caption(
+                    #                 img, aux_task_dict[int(agent.curr_high_level_act)])
+
+                    #     cv2.imwrite(os.path.join(img_path, f"{str(img_i).zfill(4)}.png"), img)
+
             all_seed_values = np.array(all_seed_values)
             mean = all_seed_values.mean(axis=0)
             std = all_seed_values.std(axis=0)
@@ -236,10 +329,27 @@ for task_i, task in enumerate(tasks):
             all_seed_expert_values = np.array(all_seed_expert_values)
             per_seed_expert_mean = all_seed_expert_values.mean(axis=1)
 
-            q_minus_expert = all_seed_values - per_seed_expert_mean[:, None]
+            if args.compare_max_direct:
+                q_minus_expert = all_seed_values
+            else:
+                q_minus_expert = all_seed_values - per_seed_expert_mean[:, None]
             mean = q_minus_expert.mean(axis=0)
             std = q_minus_expert.std(axis=0)
             all_seed_max = q_minus_expert.max(axis=0)
+
+            if args.save_ep_imgs:
+                for seed_i, seed in enumerate(seeds):
+                    img_path = os.path.join(fig_path, task, algo, str(seed))
+                    os.makedirs(img_path, exist_ok=True)
+                    for img_i in tqdm.trange(len(all_ep_imgs[seed_i])):
+                        # swap channel order
+                        img = cv2.cvtColor(all_ep_imgs[seed_i][img_i], cv2.COLOR_BGRA2RGBA)
+
+                        # caption with value
+                        img = fig_common.img_caption(
+                                    img, f"{q_minus_expert[seed_i, img_i]:.3f}")
+
+                        cv2.imwrite(os.path.join(img_path, f"{str(img_i).zfill(4)}.png"), img)
 
             # smooth
             if num_timesteps_mean > 1:
@@ -249,7 +359,10 @@ for task_i, task in enumerate(tasks):
                 all_seed_max = convolve1d(all_seed_max, convolv_op, axis=0, mode='nearest')
 
             # plot setup
-            ax = axes[task_i, algo_list_i]
+            if args.us_and_insert or args.horizontal_tasks:
+                ax = axes[algo_list_i, task_i]
+            else:
+                ax = axes[task_i, algo_list_i]
             # ax.set_xlabel('Timestep', fontsize=font_size - 2)
             # ax.set_ylabel('Q Value', fontsize=font_size - 2)
             ax.grid(alpha=0.5, which='both')
@@ -289,10 +402,25 @@ for task_i, task in enumerate(tasks):
 
             # ax.axhline(mean_expert.max(), linewidth=linewidth, color=cmap(cmap_i), linestyle=(0, (3, 1, 1, 1)))
 
-        if task_i == 0 and algo_list_i == len(algo_lists) - 1:
-            ax.axhline(0, linewidth=linewidth, color='black', linestyle='-.', label="Ideal max")
+        if (args.us_and_insert or args.horizontal_tasks) and algo_list_i == 0:
+            if args.env_plot == 'panda' or args.env_plot == 'single':
+                ax.set_title(f"{task_settings_dict['title']}", fontsize=font_size)
+            else:
+                ax.set_title(task, fontsize=font_size)
+
+        if args.compare_max_direct:
+            # TODO this doesn't work right now, and is probably a bad idea because each seed has very different expert maximums
+            import ipdb; ipdb.set_trace()
+            max_val = per_seed_expert_mean[:, None]
+            label = r"$\mathbb{E}_{\mathcal{B}^*} \left[ V^{\pi}(s^*) \right]$"
         else:
-            ax.axhline(0, linewidth=linewidth, color='black', linestyle='-.')
+            max_val = 0
+            label = "Ideal max"
+
+        if task_i == 0 and algo_list_i == len(algo_lists) - 1:
+            ax.axhline(max_val, linewidth=linewidth, color='black', linestyle='-.', label=label)
+        else:
+            ax.axhline(max_val, linewidth=linewidth, color='black', linestyle='-.')
 
         if log_y_axis:
             ax.set_yscale('log')
@@ -300,10 +428,14 @@ for task_i, task in enumerate(tasks):
 # add final labelling, legend, and save
 ax = fig.add_subplot(111, frameon=False)
 ax.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-ax.set_xlabel(r"Timestep $t$", fontsize=font_size)
+ax.set_xlabel(r"Episode Timestep $t$", fontsize=font_size)
 # ax.set_ylabel("Q Value", fontsize=font_size)
 # ax.set_ylabel("Q Value - Mean Expert", fontsize=font_size)
-ax.set_ylabel(r"$Q(s_t,a_t) - \mathbb{E}_{\mathcal{B}^*} \left[ Q(s^*,a^*) \right]$", fontsize=font_size, labelpad=10.0)
+if args.compare_max_direct:
+    ax.set_ylabel(r"$Q(s_t,a_t)", fontsize=font_size, labelpad=10.0)
+else:
+    # ax.set_ylabel(r"$Q(s_t,a_t) - \mathbb{E}_{\mathcal{B}^*} \left[ Q(s^*,a^*) \right]$", fontsize=font_size, labelpad=10.0)
+    ax.set_ylabel(r"$Q(s_t,a_t) - \mathbb{E}_{\mathcal{B}^*} \left[ V^{\pi}(s^*) \right]$", fontsize=font_size, labelpad=10.0)
 
 # per-row titles for task
 # grid = plt.GridSpec(fig_shape[0], fig_shape[1])
@@ -317,7 +449,8 @@ for row_i in range(fig_shape[0]):
         task_settings_dict = fig_common.PANDA_SETTINGS_DICT[task]
         title = task_settings_dict['title']
 
-    ax.set_title(f"{title}", fontsize=font_size)
+    if not (args.us_and_insert or args.horizontal_tasks):
+        ax.set_title(f"{title}", fontsize=font_size)
     ax.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 
 # if 'sawyer' in task or 'human' in task:
@@ -378,20 +511,31 @@ if len(tasks) == 1:
         leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=3,
                 bbox_to_anchor=(0.475, -.4))
 else:
-    bbta_num_tasks_dict = {
-            5: (0.475, 0.01),
-            6: (0.475, 0.01),
-            7: (0.475, 0.02),
-        }
-    leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=3,
-                bbox_to_anchor=bbta_num_tasks_dict[len(tasks)])
+    if args.us_and_insert or args.horizontal_tasks:
+        if len(algo_lists) == 1:
+            leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=3,
+                        bbox_to_anchor=(0.475, -.4))
+        elif len(algo_lists) == 2:
+            leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=4,
+                        bbox_to_anchor=(0.475, -.13))
+    else:
+        bbta_num_tasks_dict = {
+                5: (0.475, 0.01),
+                6: (0.475, 0.01),
+                7: (0.475, 0.02),
+            }
+        leg = fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=3,
+                    bbox_to_anchor=bbta_num_tasks_dict[len(tasks)])
 
 fig.subplots_adjust(hspace=.35)
 
-if len(tasks) == 1:
-    # fig_path = os.path.join(args.top_save_dir, f"{tasks[0][:15]}.pdf")
-    fig_path = os.path.join(args.top_save_dir, f"{tasks[0]}", f"{args.algo_lists}{args.extra_name}.pdf")
-else:
-    fig_path = os.path.join(args.top_save_dir, f"{args.env_plot}-multi-task.pdf")
-os.makedirs(os.path.join(args.top_save_dir, f"{tasks[0]}"), exist_ok=True)
-fig.savefig(fig_path, bbox_inches='tight')
+os.makedirs(fig_path, exist_ok=True)
+
+if args.log_y_axis:
+    fig_name = f"log_y_{fig_name}"
+if args.compare_max_direct:
+    fig_name = f"compare_max_direct_{fig_name}"
+
+fig_name = f"{args.model_str}_{fig_name}"
+
+fig.savefig(os.path.join(fig_path, fig_name), bbox_inches='tight')

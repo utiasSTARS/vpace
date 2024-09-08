@@ -21,28 +21,33 @@ import figures.cam_settings as cam_settings
 
 
 PANDA_SETTINGS_DICT = {
-    'reach_0': {'last_model': '200000.pt', 'title': 'Reach', 'main': 1},
-    'lift_0': {'last_model': '200000.pt', 'title': 'Lift', 'main': 2},
-    'move_obj_0': {'last_model': '200000.pt', 'title': 'Move', 'main': 4, 'multi-sqil-model': 2, 'timeout': 40},
-    'unstack_stack_env_only_no_move_0': {'last_model': '500000.pt', 'title': 'Unstack-Stack', 'main': 2},
-    'stack_no_move_0': {'last_model': '500000.pt', 'title': 'Stack', 'main': 2},
-    'bring_no_move_0': {'last_model': '500000.pt', 'title': 'Bring', 'main': 2},
-    'insert_no_bring_no_move_0': {'last_model': '1000000.pt', 'title': 'Insert', 'main': 2},
+    'reach_0': {'last_model': '200000.pt', 'title': 'Reach', 'main': 1, 'qtfig_model': '100000.pt'},
+    'lift_0': {'last_model': '200000.pt', 'title': 'Lift', 'main': 2, 'qtfig_model': '100000.pt'},
+    'move_obj_0': {'last_model': '200000.pt', 'title': 'Move', 'main': 4, 'multi-sqil-model': 2, 'timeout': 40,
+                   'qtfig_model': '100000.pt'},
+    'unstack_stack_env_only_no_move_0': {'last_model': '500000.pt', 'half_model': '250000.pt',
+                                         'title': 'Unstack-Stack', 'main': 2, 'qtfig_model': '300000.pt'},
+    'stack_no_move_0': {'last_model': '500000.pt', 'title': 'Stack', 'main': 2, 'qtfig_model': '300000.pt'},
+    'bring_no_move_0': {'last_model': '500000.pt', 'title': 'Bring', 'main': 2, 'qtfig_model': '300000.pt'},
+    'insert_no_bring_no_move_0': {'last_model': '1000000.pt', 'half_model': '500000.pt', 'title': 'Insert', 'main': 2,
+                                  'qtfig_model': '300000.pt'},
 }
 
 SAWYER_HAND_SETTINGS_DICT = {
-    'sawyer_drawer_open': {'last_model': '300000.pt', 'ret_suc': 0.1},
-    'sawyer_drawer_close': {'last_model': '300000.pt', 'ret_suc': 0.15, 'multi-sqil-model': 2},
-    'sawyer_push': {'last_model': '500000.pt', 'ret_suc': 0.2},
-    'sawyer_lift': {'last_model': '500000.pt', 'ret_suc': 0.05},
-    'sawyer_box_close': {'last_model': '500000.pt', 'ret_suc': 0.2},
-    'sawyer_bin_picking': {'last_model': '300000.pt', 'ret_suc': 0.12, 'multi-sqil-model': 2},
-    'door-human-v0': {'last_model': '300000.pt', 'ret_suc': 2000, 'timeout': 100},
-    'hammer-human-v0': {'last_model': '500000.pt', 'ret_suc': 2500, 'timeout': 100},
-    'relocate-human-v0': {'last_model': '1500000.pt', 'ret_suc': 1000},
-    'door-human-v0-dp': {'last_model': '500000.pt', 'ret_suc': 1000, 'timeout': 100, 'multi-sqil-model': 5},
-    'hammer-human-v0-dp': {'last_model': '1000000.pt', 'ret_suc': 700},
-    'relocate-human-v0-najp-dp': {'last_model': '1500000.pt', 'ret_suc': 1000, 'multi-sqil-model': 5},
+    'sawyer_drawer_open': {'last_model': '300000.pt', 'ret_suc': 0.1, 'qtfig_model': '200000.pt'},
+    'sawyer_drawer_close': {'last_model': '300000.pt', 'ret_suc': 0.15, 'multi-sqil-model': 2, 'qtfig_model': '200000.pt'},
+    'sawyer_push': {'last_model': '500000.pt', 'ret_suc': 0.2, 'qtfig_model': '300000.pt'},
+    'sawyer_lift': {'last_model': '500000.pt', 'ret_suc': 0.05, 'qtfig_model': '300000.pt'},
+    'sawyer_box_close': {'last_model': '500000.pt', 'ret_suc': 0.2, 'qtfig_model': '300000.pt'},
+    'sawyer_bin_picking': {'last_model': '300000.pt', 'ret_suc': 0.12, 'multi-sqil-model': 2, 'qtfig_model': '200000.pt'},
+    'door-human-v0': {'last_model': '300000.pt', 'ret_suc': 2000, 'timeout': 100, 'qtfig_model': '200000.pt'},
+    'hammer-human-v0': {'last_model': '500000.pt', 'ret_suc': 2500, 'timeout': 100, 'qtfig_model': '300000.pt'},
+    'relocate-human-v0': {'last_model': '1500000.pt', 'ret_suc': 1000, 'qtfig_model': '1000000.pt'},
+    'door-human-v0-dp': {'last_model': '500000.pt', 'ret_suc': 1000, 'timeout': 100, 'multi-sqil-model': 5,
+                         'qtfig_model': '300000.pt'},
+    'hammer-human-v0-dp': {'last_model': '1000000.pt', 'ret_suc': 700, 'qtfig_model': '500000.pt'},
+    'relocate-human-v0-najp-dp': {'last_model': '1500000.pt', 'ret_suc': 1000, 'multi-sqil-model': 5,
+                                 'qtfig_model': '1000000.pt'},
 }
 
 
@@ -169,12 +174,12 @@ def set_cam(args, task, env):
         env.env.gripper._internal_substep_render_func = partial(
             env.env.render, mode=args.panda_cam_str, substep_render=True)
 
-def get_ts_imgs(args, task, env, ts):
+def get_ts_imgs(args, task, env, ts, get_panda_substeps=True):
     if 'sawyer' in task or 'human' in task:
         img = env.unwrapped.render('rgb_array', width=args.img_w, height=args.img_h)
         imgs = [img]
     else:
-        if ts == 0:
+        if ts == 0 or not get_panda_substeps:
             img, _ = env.env.render(args.panda_cam_str)
             imgs = [img]
         else:
