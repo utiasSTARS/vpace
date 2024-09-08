@@ -2,7 +2,7 @@
 
 <!-- <p float="middle"> -->
 <p align="center">
-  <img src="https://github.com/utiasSTARS/vpace/blob/main/system-900dpi.png" width="90%" >
+  <img src="https://github.com/utiasSTARS/vpace/blob/main/vpace-motivation-new-50.png" width="40%" >
 </p>
 
 This repository contains data, code, and instructions for reproducing the results from **v**alue-**p**enalized **a**uxiliary **c**ontrol from **e**xamples (VPACE).
@@ -117,8 +117,8 @@ You may want to install some dependencies first with:
 # Citation
 If you find this repository useful for your work, please consider citing VPACE:
 <pre>
-@misc{ablett2024valuepenalizedauxiliarycontrolexamples,
-      title={Value-Penalized Auxiliary Control from Examples for Learning without Rewards or Demonstrations}, 
+@misc{ablett2024efficientimitationwithoutdemonstrationsvia,
+      title={Efficient Imitation Without Demonstrations via Value-Penalized Auxiliary Control from Examples}, 
       author={Trevor Ablett and Bryan Chan and Jayce Haoran Wang and Jonathan Kelly},
       year={2024},
       eprint={2407.03311},
