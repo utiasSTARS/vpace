@@ -107,6 +107,9 @@ if args.force_vert_squish:
         plot_size[0] = 4.2
     font_size += 2
 
+if 'abl' in args.plot and side_legend:
+    plot_size[0] -= 0.7
+
 if args.plot == 'panda_2_and_all_avgs':
     fig_shape = [1, 5]
     plot_size[0] -= .7
@@ -553,6 +556,10 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
             bbta = (1.15, 0.25)
             if args.plot == 'abl_exaug':
                 bbta = (1.22, 0.2)
+            elif args.plot == 'abl_expert':
+                bbta = (1.19, 0.22)
+            elif args.plot == 'abl_dquant_lambda':
+                bbta = (1.19, 0.17)
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
                         ncol=1, bbox_to_anchor=bbta)
         else:
@@ -634,7 +641,8 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
     if args.one_row:
         fig_name = f"one_row_{fig_name}"
 
-    fig_name = f"{args.custom_algo_list}_{fig_name}"
+    if args.custom_algo_list != "":
+        fig_name = f"{args.custom_algo_list}_{fig_name}"
 
     # if args.custom_algo_list == 'ace_variations':
     #     fig_name = f"ace_var_{fig_name}"

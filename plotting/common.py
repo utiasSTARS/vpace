@@ -139,13 +139,16 @@ ALGO_TITLE_DICT = OrderedDict({
         'cmap_i': 13,
     },
     'full_trajs':{
-        'title': '+Full Trajs',
+        # 'title': '+Full Trajs',
+        'title': '+Trajs',
         # 'title': 'LfGP (obs only)',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 8,
     },
     'full_trajs_wa':{
-        'title': '+Full Trajs \\& Acts',
+        # 'title': '+Full Trajs \\& Acts',
+        'title': '+Trajs \n \\& Acts',
+        # 'title': '+Trajs, \\\\ Acts',
         # 'title': 'LfGP (obs + act)',
         'plots': {'abl_expert', 'abl_all'},
         'cmap_i': 17,
@@ -212,7 +215,8 @@ ALGO_TITLE_DICT = OrderedDict({
         'cmap_i': 14,
     },
     'qreg-ace-sqil':{
-        'title': r'C2F: $||Q(s,a)||_2^2$',
+        # 'title': r'C2F: $||Q(s,a)||_2^2$',
+        'title': r'C2F',
         'plots': {'abl_reg'},
         'cmap_i': 19,
     },
@@ -909,11 +913,13 @@ def get_algo_defaults(plot='main'):
         if 'abl' in plot and k == 'multi-sqil':
             # algo_titles.append("VPACE-SQIL, no ablations")
             if 'dquant_lambda' in plot:
-                algo_titles.append(r"200 Ex., $\lambda=10$")
+                # algo_titles.append(r"200 Ex., $\lambda=10$")
+                algo_titles.append(r"\noindent 200 Ex., \\ $\lambda=10$")
             elif 'dquant' in plot:
                 algo_titles.append("200 Examples")
             elif 'reg' in plot:
-                algo_titles.append(r"VP: $ y(s, s') \leq y(s^*, s^*)$")
+                # algo_titles.append(r"VP: $ y(s, s') \leq y(s^*, s^*)$")
+                algo_titles.append(r"VP")
             elif plot == 'abl_lambda':
                 algo_titles.append(r'$\lambda = 10$')
             else:
