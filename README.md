@@ -1,4 +1,5 @@
-# Value-Penalized Auxiliary Control from Examples for Learning without Rewards or Demonstrations
+.no-toc
+# Efficient Imitation Without Demonstrations via Value-Penalized Auxiliary Control from Examples
 
 <!-- <p float="middle"> -->
 <p align="center">
@@ -6,17 +7,17 @@
 </p>
 
 This repository contains data, code, and instructions for reproducing the results from **v**alue-**p**enalized **a**uxiliary **c**ontrol from **e**xamples (VPACE).
+VPACE uses the [scheduled auxiliary control](https://arxiv.org/abs/1802.10567) framework, combined with a novel value penalty, to significantly improve the learning efficiency of example-based control.
 
-- [Value-Penalized Auxiliary Control from Examples for Learning without Rewards or Demonstrations](#value-penalized-auxiliary-control-from-examples-for-learning-without-rewards-or-demonstrations)
-  - [Installation (Algorithm + Simulated Panda Environments)](#installation-algorithm--simulated-panda-environments)
-    - [Sawyer and Adroit Hand Baselines](#sawyer-and-adroit-hand-baselines)
-    - [Real World Experiments](#real-world-experiments)
-  - [Running](#running)
-    - [Quick Start](#quick-start)
-    - [Task Options](#task-options)
-    - [Algorithm Options](#algorithm-options)
-    - [Ablation Study Options](#ablation-study-options)
-  - [Figures](#figures)
+- [Installation (Algorithm + Simulated Panda Environments)](#installation-algorithm--simulated-panda-environments)
+  - [Sawyer and Adroit Hand Baselines](#sawyer-and-adroit-hand-baselines)
+  - [Real World Experiments](#real-world-experiments)
+- [Running](#running)
+  - [Quick Start](#quick-start)
+  - [Task Options](#task-options)
+  - [Algorithm Options](#algorithm-options)
+  - [Ablation Study Options](#ablation-study-options)
+- [Figures](#figures)
 - [Citation](#citation)
 
 ## Installation (Algorithm + Simulated Panda Environments)
@@ -114,7 +115,7 @@ You may want to install some dependencies first with:
 
 1. `pip install -r reqs/fig_requirements.txt`
 
-# Citation
+## Citation
 If you find this repository useful for your work, please consider citing VPACE:
 <pre>
 @misc{ablett2024efficientimitationwithoutdemonstrationsvia,
