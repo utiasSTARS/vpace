@@ -1,4 +1,3 @@
-.no-toc
 # Efficient Imitation Without Demonstrations via Value-Penalized Auxiliary Control from Examples
 
 <!-- <p float="middle"> -->
