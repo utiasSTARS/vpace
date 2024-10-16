@@ -15,6 +15,7 @@ CUSTOM_ALGO_LIST_DICT = {
     'overall_and_ace': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'disc-no-vp', 'rce'],
     # 'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'sqil-rnd', 'disc-no-vp', 'rce']
     'overall_and_ace_and_rnd': ['multi-sqil', 'multi-sqil-no-vp', 'sqil-no-vp', 'rce', 'disc-no-vp', 'sqil-rnd'],
+    'overall_no_ace_and_rnd': ['multi-sqil', 'sqil-no-vp', 'rce', 'disc-no-vp', 'sqil-rnd'],
     'ace_variations': ['multi-sqil', 'multi-disc', 'multi-rce'],
     'ace_variations_and_vpsqil': ['multi-sqil', 'multi-disc', 'multi-rce', 'sqil'],
     'vp_variations': ['multi-sqil', 'sqil', 'sqil-no-vp'],

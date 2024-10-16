@@ -36,8 +36,8 @@ parser.add_argument('--force_vert_squish', action='store_true')
 parser.add_argument('--constrained_layout', action='store_true')
 parser.add_argument('--bigger_labels', action='store_true')
 parser.add_argument('--custom_algo_list', type=str, default="",
-                    choices=['overall', 'overall_and_ace', 'overall_and_ace_and_rnd', 'ace_variations',
-                             'ace_variations_and_vpsqil', 'vp_variations', 'vpace_ace_sqil'])
+                    choices=['overall', 'overall_and_ace', 'overall_and_ace_and_rnd', 'overall_no_ace_and_rnd',
+                             'ace_variations', 'ace_variations_and_vpsqil', 'vp_variations', 'vpace_ace_sqil'])
 parser.add_argument('--bottom_legend', action='store_true')
 parser.add_argument('--use_rliable', action='store_true')
 parser.add_argument('--rliable_num_reps', type=int, default=20000)
@@ -50,8 +50,9 @@ args = parser.parse_args()
 
 # since this is the plot we're using
 if args.plot in ['panda_2_and_avgs', 'panda_3_overall', 'panda_2_and_all_avgs', 'all_avgs']:
-    args.custom_algo_list = 'overall_and_ace_and_rnd'
-    # args.custom_algo_list = 'overall_and_ace'
+    if args.custom_algo_list == '':
+        args.custom_algo_list = 'overall_and_ace_and_rnd'
+        # args.custom_algo_list = 'overall_and_ace'
 
 fig_name = f"{args.plot}_performance"
 
@@ -413,6 +414,10 @@ for task_i, task in enumerate(task_dir_names):
                 if task_i == 0:
                     if algo == 'disc':
                         label = "DAC"
+            if 'all_avgs' == args.plot and 'no_ace' in args.custom_algo_list:
+                if task_i == 0:
+                    if algo == 'sqil-rnd':
+                        label = 'RND'
 
             if args.use_rliable and not task in real_data_locations:
                 ax.plot(x_vals, iqm_scores, label=label,
@@ -571,9 +576,12 @@ for fig, fig_name in zip([s_fig, r_fig], ['s_fig.pdf', 'r_fig.pdf']):
             fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
                         ncol=num_col, bbox_to_anchor=bbta)
     elif fig_shape == [1, 3] and len(valid_algos) > 3:
-        fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
-                        ncol=int(math.ceil((len(valid_algos) + 1)) / 2),
-                        bbox_to_anchor=(0.5, -0.33))
+        if side_legend:
+            fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
+                       ncol=1, bbox_to_anchor=(1.11, 0.22))
+        else:
+            fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center",
+                            ncol=int(math.ceil((len(valid_algos) + 1)) / 2), bbox_to_anchor=(0.5, -0.33))
     elif fig_shape == [2, 4] and sum(valid_task) == 8:
         # legend underneath
         fig.legend(fancybox=True, shadow=True, fontsize=font_size-2, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.11))
